@@ -1,68 +1,111 @@
 #!/usr/bin/env python3
 """
-Convert PNG image to favicon.ico with multiple sizes
+Convert high-res PNG to multi-size favicon.ico with optimal clarity
 """
 
 from PIL import Image
+import io
+import struct
 import os
 import sys
 
-def convert_to_favicon(png_path, output_path=None):
+
+def create_ico_file(images, output_path):
     """
-    Convert PNG to favicon.ico with standard sizes
+    Create a multi-size ICO file from a list of PIL Images.
+    Uses PNG format for each size for best quality.
     """
-    if output_path is None:
-        output_path = os.path.join(os.path.dirname(png_path), 'favicon.ico')
+    num_images = len(images)
     
-    # Open the source image
-    img = Image.open(png_path)
+    # ICO Header (6 bytes): Reserved + Type + Count
+    header = struct.pack('<HHH', 0, 1, num_images)
     
-    # Convert to RGBA if not already
-    if img.mode != 'RGBA':
-        img = img.convert('RGBA')
+    # Calculate directory size
+    directory_size = 16 * num_images
+    header_size = 6 + directory_size
     
-    # Standard favicon sizes
-    sizes = [16, 32, 48, 64, 128, 256]
+    # Prepare directory entries and image data
+    directory = b''
+    image_data = b''
+    offset = header_size
     
-    # Create resized versions
-    icons = []
-    for size in sizes:
-        resized = img.resize((size, size), Image.Resampling.LANCZOS)
-        icons.append(resized)
+    for img in images:
+        # Convert to PNG bytes for storage
+        png_buffer = io.BytesIO()
+        img.save(png_buffer, format='PNG', optimize=False)
+        png_bytes = png_buffer.getvalue()
+        size_in_bytes = len(png_bytes)
+        
+        width, height = img.size
+        # ICO format: 0 means 256
+        w = 0 if width >= 256 else width
+        h = 0 if height >= 256 else height
+        
+        # Directory Entry (16 bytes)
+        entry = struct.pack('<BBBBHHII', 
+            w, h, 0, 0,       # width, height, colors, reserved
+            1, 32,            # planes, bpp
+            size_in_bytes,
+            offset
+        )
+        directory += entry
+        image_data += png_bytes
+        offset += size_in_bytes
     
-    # Save as multi-size ICO
-    icons[0].save(
-        output_path,
-        format='ICO',
-        sizes=[(size, size) for size in sizes],
-        append_images=icons[1:]
-    )
+    # Write the complete ICO file
+    with open(output_path, 'wb') as f:
+        f.write(header)
+        f.write(directory)
+        f.write(image_data)
     
-    print(f"✅ Favicon created: {output_path}")
-    print(f"   Sizes included: {sizes}")
     return output_path
 
+
+def create_crisp_favicon(source_path, output_path):
+    """
+    Create a high-quality favicon from source image.
+    """
+    source = Image.open(source_path)
+    print(f"Source image: {source.size[0]}x{source.size[1]}, mode: {source.mode}")
+    
+    if source.mode != 'RGBA':
+        source = source.convert('RGBA')
+    
+    sizes = [16, 32, 48, 64, 128, 256]
+    
+    icons = []
+    for size in sizes:
+        resized = source.resize((size, size), Image.Resampling.LANCZOS)
+        icons.append(resized)
+        print(f"  ✓ Generated {size}x{size}")
+    
+    create_ico_file(icons, output_path)
+    
+    file_size = os.path.getsize(output_path)
+    print(f"\n✅ Favicon created: {output_path}")
+    print(f"   Sizes: {sizes}")
+    print(f"   File size: {file_size / 1024:.1f} KB")
+    
+    return output_path
+
+
 if __name__ == '__main__':
-    # Get the project root directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     
-    # Paths
-    png_path = os.path.join(project_root, 'icon', 'carrot.png')
-    output_path = os.path.join(project_root, 'app', 'favicon.ico')
+    source_path = os.path.join(project_root, 'icon', 'carrot.png')
+    output_path = os.path.join(project_root, 'public', 'favicon.ico')
     
-    # Ensure icon directory exists
-    if not os.path.exists(png_path):
-        print(f"❌ Error: Source image not found at {png_path}")
+    if not os.path.exists(source_path):
+        print(f"❌ Error: Source image not found at {source_path}")
         sys.exit(1)
     
-    # Ensure app directory exists
-    app_dir = os.path.dirname(output_path)
-    os.makedirs(app_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # Convert
     try:
-        convert_to_favicon(png_path, output_path)
+        create_crisp_favicon(source_path, output_path)
     except Exception as e:
         print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
