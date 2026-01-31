@@ -478,7 +478,7 @@ export default function Home() {
                     borderRadius: '4px',
                     fontSize: '12px'
                   }}>
-                    调: {formatKey(song.key)}
+                    key: {formatKey(song.key)}
                   </span>
                   {song.tags.map((tag, i) => (
                     <span
