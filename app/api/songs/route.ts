@@ -50,7 +50,7 @@ export async function GET() {
 // 添加新歌
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateSongRequest = await request.json();
+    const body = await request.json();
     const { name, singers, tags, key } = body;
     
     if (!name || !name.trim()) {
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
     const song: Song = {
       id,
       name: name.trim(),
-      singers: singers.filter(s => s.trim()).map(s => s.trim()),
-      tags: tags ? tags.filter(t => t.trim()).map(t => t.trim()) : [],
+      singers: singers.filter((s: string) => s.trim()).map((s: string) => s.trim()),
+      tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: typeof key === 'number' ? key : 0,
       createdAt: new Date().toISOString()
     };
