@@ -7,13 +7,13 @@ export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  
+
   // 表单状态
   const [name, setName] = useState('');
   const [singersInput, setSingersInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [key, setKey] = useState(0);
-  
+
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
   const fetchSongs = async () => {
@@ -31,24 +31,24 @@ export default function Home() {
   const addSong = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const singers = singersInput.split(/[,，]/).map(s => s.trim()).filter(s => s);
       const tags = tagsInput.split(/[,，]/).map(t => t.trim()).filter(t => t);
-      
+
       const request: CreateSongRequest = {
         name,
         singers,
         tags,
         key
       };
-      
+
       const response = await fetch('/api/songs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request)
       });
-      
+
       const data = await response.json();
       if (data.success) {
         // 重置表单
@@ -71,12 +71,12 @@ export default function Home() {
 
   const removeSong = async (id: string) => {
     if (!confirm('确定要删除这首歌吗？')) return;
-    
+
     try {
       const response = await fetch(`/api/songs/${id}`, {
         method: 'DELETE'
       });
-      
+
       const data = await response.json();
       if (data.success) {
         if (selectedSong?.id === id) {
@@ -107,7 +107,7 @@ export default function Home() {
       <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', color: '#333' }}>
         🎵 我的歌单
       </h1>
-      
+
       <button
         onClick={() => setShowForm(!showForm)}
         style={{
@@ -123,7 +123,7 @@ export default function Home() {
       >
         {showForm ? '取消' : '+ 添加歌曲'}
       </button>
-      
+
       {showForm && (
         <form
           onSubmit={addSong}
@@ -154,14 +154,14 @@ export default function Home() {
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               参考歌手 *（多个用逗号分隔）
             </label>
             <input
               type="text"
-              value={singlersInput}
+              value={singersInput}
               onChange={(e) => setSingersInput(e.target.value)}
               style={{
                 width: '100%',
@@ -175,7 +175,7 @@ export default function Home() {
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               标签（多个用逗号分隔）
@@ -195,7 +195,7 @@ export default function Home() {
               placeholder="如：流行, 抒情, 经典"
             />
           </div>
-          
+
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               升降调
@@ -241,7 +241,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -259,7 +259,7 @@ export default function Home() {
           </button>
         </form>
       )}
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         <div>
           <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>歌曲列表 ({songs.length})</h2>
@@ -316,7 +316,7 @@ export default function Home() {
             )}
           </div>
         </div>
-        
+
         <div>
           {selectedSong ? (
             <div style={{
@@ -326,21 +326,21 @@ export default function Home() {
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
               <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{selectedSong.name}</h2>
-              
+
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ color: '#666', fontSize: '14px' }}>参考歌手</label>
                 <div style={{ fontSize: '18px', marginTop: '4px' }}>
                   {selectedSong.singers.join(', ')}
                 </div>
               </div>
-              
+
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ color: '#666', fontSize: '14px' }}>升降调</label>
                 <div style={{ fontSize: '18px', marginTop: '4px', fontWeight: 'bold', color: '#2196F3' }}>
                   {formatKey(selectedSong.key)}
                 </div>
               </div>
-              
+
               {selectedSong.tags.length > 0 && (
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ color: '#666', fontSize: '14px' }}>标签</label>
@@ -362,11 +362,11 @@ export default function Home() {
                   </div>
                 </div>
               )}
-              
+
               <div style={{ color: '#999', fontSize: '12px', marginBottom: '24px' }}>
                 添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
               </div>
-              
+
               <button
                 onClick={() => removeSong(selectedSong.id)}
                 style={{
