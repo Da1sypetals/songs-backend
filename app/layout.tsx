@@ -1,5 +1,5 @@
 export const metadata = {
-  title: '我的歌单',
+  title: 'Daisy的歌单',
   description: '记录我会唱的歌曲',
   icons: {
     icon: '/favicon.ico',

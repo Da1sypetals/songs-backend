@@ -219,7 +219,7 @@ export default function Home() {
   return (
     <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
       <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', color: '#333' }}>
-        🎵 我的歌单
+        🎵 Daisy的歌单
       </h1>
 
       {/* 搜索区域 */}
