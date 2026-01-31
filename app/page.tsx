@@ -3,6 +3,27 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Song, CreateSongRequest } from '@/types/song';
 
+/**
+ * 对歌曲列表进行排序
+ * 排序优先级：歌手名 > 歌曲名 > key绝对值
+ */
+function sortSongs(songs: Song[]): Song[] {
+  return [...songs].sort((a, b) => {
+    // 1. 按第一个歌手名排序（字母顺序）
+    const singerA = a.singers[0] || '';
+    const singerB = b.singers[0] || '';
+    const singerCompare = singerA.localeCompare(singerB, 'zh-CN');
+    if (singerCompare !== 0) return singerCompare;
+
+    // 2. 按歌曲名排序（字母顺序）
+    const nameCompare = a.name.localeCompare(b.name, 'zh-CN');
+    if (nameCompare !== 0) return nameCompare;
+
+    // 3. 按key绝对值排序（从小到大）
+    return Math.abs(a.key) - Math.abs(b.key);
+  });
+}
+
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,9 +65,9 @@ export default function Home() {
     }
   };
 
-  // 过滤歌曲
+  // 过滤并排序歌曲
   const filteredSongs = useMemo(() => {
-    return songs.filter(song => {
+    const filtered = songs.filter(song => {
       // 歌名搜索
       if (searchName.trim()) {
         const searchLower = searchName.trim().toLowerCase();
@@ -75,6 +96,9 @@ export default function Home() {
 
       return true;
     });
+
+    // 应用排序
+    return sortSongs(filtered);
   }, [songs, searchName, searchSinger, searchTag]);
 
   // 清除所有搜索
