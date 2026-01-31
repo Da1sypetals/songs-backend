@@ -1,6 +1,11 @@
-export const metadata = {
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
   title: '我的歌单',
   description: '记录我会唱的歌曲',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
