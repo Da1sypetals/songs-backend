@@ -6,7 +6,7 @@ const redis = Redis.fromEnv();
 
 // 获取单首歌曲
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -69,7 +69,7 @@ export async function PUT(
     const updatedSong: Song = {
       id: params.id,
       name: name.trim(),
-      singers: singers.filter(s => s.trim()).map(s => s.trim()),
+      singers: singers.filter((s: string) => s.trim()).map((s: string) => s.trim()),
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: typeof key === 'number' ? key : 0,
       createdAt: existingSong.createdAt
@@ -91,7 +91,7 @@ export async function PUT(
 
 // 删除歌曲
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

@@ -3,6 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Song, CreateSongRequest } from '@/types/song';
 
+// 从环境变量读取密码，默认为 'daisy2024'
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_SONGLIST_PASSWORD?.trim() || 'daisy2024';
+const ADMIN_KEY = 'isAdmin';
+
 /**
  * 对歌曲列表进行排序
  * 排序优先级：歌手名 > 歌曲名 > key绝对值
@@ -53,6 +57,48 @@ export default function Home() {
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const CACHE_DURATION = 30000; // 30秒缓存
+
+  // 认证状态
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  // 检查本地存储的登录状态
+  useEffect(() => {
+    const adminStatus = localStorage.getItem(ADMIN_KEY);
+    if (adminStatus === 'true') {
+      setIsAdmin(true);
+    }
+  }, []);
+
+  // 处理登录
+  const handleLogin = () => {
+    if (loginPassword === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      localStorage.setItem(ADMIN_KEY, 'true');
+      setShowLoginModal(false);
+      setLoginPassword('');
+      setLoginError('');
+    } else {
+      setLoginError('密码错误');
+    }
+  };
+
+  // 处理登出
+  const handleLogout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem(ADMIN_KEY);
+    setShowForm(false);
+    setIsEditing(false);
+  };
+
+  // 打开登录弹窗
+  const openLoginModal = () => {
+    setShowLoginModal(true);
+    setLoginPassword('');
+    setLoginError('');
+  };
 
   const fetchSongs = async (forceRefresh = false) => {
     // 检查缓存
@@ -120,6 +166,10 @@ export default function Home() {
 
   const addSong = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('请先登录管理员账号');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -159,6 +209,10 @@ export default function Home() {
   };
 
   const removeSong = async (id: string) => {
+    if (!isAdmin) {
+      alert('请先登录管理员账号');
+      return;
+    }
     if (!confirm('确定要删除这首歌吗？')) return;
 
     try {
@@ -200,6 +254,10 @@ export default function Home() {
   // 保存编辑
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('请先登录管理员账号');
+      return;
+    }
     if (!selectedSong) return;
 
     setLoading(true);
@@ -256,9 +314,123 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', color: '#333' }}>
-        🎵 Daisy的歌单
-      </h1>
+      {/* 登录弹窗 */}
+      {showLoginModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '32px',
+            borderRadius: '12px',
+            width: '90%',
+            maxWidth: '360px'
+          }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '20px' }}>请输入密码</h2>
+            <input
+              type="password"
+              placeholder="密码"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                fontSize: '16px',
+                marginBottom: '12px',
+                boxSizing: 'border-box'
+              }}
+            />
+            {loginError && (
+              <p style={{ color: '#f44336', fontSize: '14px', marginBottom: '12px' }}>{loginError}</p>
+            )}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #ddd',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                取消
+              </button>
+              <button
+                onClick={handleLogin}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#2196F3',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                进入
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 标题栏 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#333', margin: 0 }}>
+          🎵 Daisy的歌单
+        </h1>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {isAdmin ? (
+            <>
+              <span style={{ color: '#4CAF50', fontSize: '14px' }}>✓ 已解锁</span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  border: '1px solid #ddd',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                退出
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={openLoginModal}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                border: 'none',
+                background: '#2196F3',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              编辑模式
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* 搜索区域 */}
       <div style={{
@@ -316,21 +488,23 @@ export default function Home() {
         </div>
       </div>
 
-      <button
-        onClick={() => setShowForm(!showForm)}
-        style={{
-          background: '#4CAF50',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          marginBottom: '24px'
-        }}
-      >
-        {showForm ? '取消' : '+ 添加歌曲'}
-      </button>
+      {isAdmin && (
+        <button
+          onClick={() => setShowForm(!showForm)}
+          style={{
+            background: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            marginBottom: '24px'
+          }}
+        >
+          {showForm ? '取消' : '+ 添加歌曲'}
+        </button>
+      )}
 
       {showForm && (
         <form
@@ -780,38 +954,51 @@ export default function Home() {
                   添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    onClick={startEdit}
-                    style={{
-                      flex: 1,
-                      background: '#2196F3',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '16px'
-                    }}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    onClick={() => removeSong(selectedSong.id)}
-                    style={{
-                      flex: 1,
-                      background: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '16px'
-                    }}
-                  >
-                    删除
-                  </button>
-                </div>
+                {isAdmin ? (
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={startEdit}
+                      style={{
+                        flex: 1,
+                        background: '#2196F3',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '16px'
+                      }}
+                    >
+                      编辑
+                    </button>
+                    <button
+                      onClick={() => removeSong(selectedSong.id)}
+                      style={{
+                        flex: 1,
+                        background: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '16px'
+                      }}
+                    >
+                      删除
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{
+                    padding: '12px',
+                    background: '#fff3e0',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    color: '#e65100',
+                    fontSize: '14px'
+                  }}>
+                    🔒 只读模式（登录后可编辑）
+                  </div>
+                )}
               </div>
             )
           ) : (
