@@ -458,7 +458,7 @@ export default function Home() {
         </form>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
         <div>
           <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>
             歌曲列表 ({filteredSongs.length}/{songs.length})
@@ -552,7 +552,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div>
+        <div style={{ position: 'sticky', top: '20px' }}>
           {selectedSong ? (
             isEditing ? (
               // 编辑模式
