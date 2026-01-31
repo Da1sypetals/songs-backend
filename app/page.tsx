@@ -50,13 +50,23 @@ export default function Home() {
   const [editTagsInput, setEditTagsInput] = useState('');
   const [editKey, setEditKey] = useState(0);
 
-  const fetchSongs = async () => {
+  // 客户端缓存
+  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const CACHE_DURATION = 30000; // 30秒缓存
+
+  const fetchSongs = async (forceRefresh = false) => {
+    // 检查缓存
+    if (!forceRefresh && Date.now() - lastFetchTime < CACHE_DURATION && songs.length > 0) {
+      return;
+    }
+
     setIsLoadingSongs(true);
     try {
       const response = await fetch('/api/songs');
       const data = await response.json();
       if (data.success) {
         setSongs(data.data);
+        setLastFetchTime(Date.now());
       }
     } catch (error) {
       console.error('获取歌曲列表失败:', error);
@@ -136,7 +146,7 @@ export default function Home() {
         setTagsInput('');
         setKey(0);
         setShowForm(false);
-        fetchSongs();
+        fetchSongs(true);
       } else {
         alert(data.error || '添加失败');
       }
@@ -162,7 +172,7 @@ export default function Home() {
           setSelectedSong(null);
           setIsEditing(false);
         }
-        fetchSongs();
+        fetchSongs(true);
       } else {
         alert(data.error || '删除失败');
       }
@@ -212,7 +222,7 @@ export default function Home() {
       if (data.success) {
         setIsEditing(false);
         setSelectedSong(data.data);
-        fetchSongs();
+        fetchSongs(true);
       } else {
         alert(data.error || '更新失败');
       }

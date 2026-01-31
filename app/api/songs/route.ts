@@ -5,16 +5,30 @@ import { Song, CreateSongRequest } from '@/types/song';
 
 const redis = Redis.fromEnv();
 
-// 获取所有歌曲
+// 获取所有歌曲 - 使用 Pipeline 优化
 export async function GET() {
   try {
     const keys = await redis.keys('song:*');
+    
+    if (keys.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: []
+      });
+    }
+    
+    // 使用 pipeline 批量获取所有歌曲
+    const pipeline = redis.pipeline();
+    for (const key of keys) {
+      pipeline.get(key);
+    }
+    
+    const results = await pipeline.exec();
     const songs: Song[] = [];
     
-    for (const key of keys) {
-      const song = await redis.get<Song>(key);
-      if (song) {
-        songs.push(song);
+    for (const result of results) {
+      if (result) {
+        songs.push(result as Song);
       }
     }
     
