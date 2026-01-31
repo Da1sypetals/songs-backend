@@ -6,6 +6,7 @@ import { Song, CreateSongRequest } from '@/types/song';
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLoadingSongs, setIsLoadingSongs] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
   // 表单状态（添加）
@@ -29,6 +30,7 @@ export default function Home() {
   const [editKey, setEditKey] = useState(0);
 
   const fetchSongs = async () => {
+    setIsLoadingSongs(true);
     try {
       const response = await fetch('/api/songs');
       const data = await response.json();
@@ -37,6 +39,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('获取歌曲列表失败:', error);
+    } finally {
+      setIsLoadingSongs(false);
     }
   };
 
@@ -497,7 +501,26 @@ export default function Home() {
                 </div>
               </div>
             ))}
-            {filteredSongs.length === 0 && (
+            {isLoadingSongs ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '4px solid #f3f3f3',
+                  borderTop: '4px solid #2196F3',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto 16px'
+                }} />
+                <style>{`
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                `}</style>
+                <p style={{ color: '#666' }}>加载中...</p>
+              </div>
+            ) : filteredSongs.length === 0 && (
               <p style={{ color: '#999', textAlign: 'center', padding: '40px' }}>
                 {songs.length === 0 ? '还没有歌曲，添加一首吧！' : '没有匹配的歌曲'}
               </p>
