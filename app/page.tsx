@@ -3,39 +3,30 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Song, CreateSongRequest } from '@/types/song';
 
-// 主题色
-const theme = {
-  bg: '#fff0f5',           // 浅粉色背景
-  cardBg: '#ffffff',
-  primary: '#ff69b4',      // 热粉色
-  primaryLight: '#ffb6c1', // 浅粉色
-  singer: '#9c27b0',       // 紫色 - 歌手
-  singerBg: '#f3e5f5',     // 浅紫色背景
-  tag: '#2e7d32',          // 绿色 - 标签
-  tagBg: '#e8f5e9',        // 浅绿色背景
-  text: '#333333',
-  textSecondary: '#666666',
-  border: '#ffc0cb',
-};
-
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  // 搜索框状态
-  const [nameFilter, setNameFilter] = useState('');
-  const [singerFilter, setSingerFilter] = useState('');
-  const [tagFilter, setTagFilter] = useState('');
-
-  // 表单状态（添加/编辑共用）
+  // 表单状态（添加）
   const [name, setName] = useState('');
   const [singersInput, setSingersInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [key, setKey] = useState(0);
 
+  // 搜索框状态
+  const [searchName, setSearchName] = useState('');
+  const [searchSinger, setSearchSinger] = useState('');
+  const [searchTag, setSearchTag] = useState('');
+
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  // 编辑表单状态
+  const [editName, setEditName] = useState('');
+  const [editSingersInput, setEditSingersInput] = useState('');
+  const [editTagsInput, setEditTagsInput] = useState('');
+  const [editKey, setEditKey] = useState(0);
 
   const fetchSongs = async () => {
     try {
@@ -49,56 +40,44 @@ export default function Home() {
     }
   };
 
-  // 过滤逻辑 - AND 关系
+  // 过滤歌曲
   const filteredSongs = useMemo(() => {
-    const nameQuery = nameFilter.trim().toLowerCase();
-    const singerQuery = singerFilter.trim().toLowerCase();
-    const tagQuery = tagFilter.trim().toLowerCase();
-
     return songs.filter(song => {
-      // 歌曲名过滤
-      if (nameQuery && !song.name.toLowerCase().includes(nameQuery)) {
-        return false;
+      // 歌名搜索
+      if (searchName.trim()) {
+        const searchLower = searchName.trim().toLowerCase();
+        if (!song.name.toLowerCase().includes(searchLower)) {
+          return false;
+        }
       }
-      // 歌手过滤（任一歌手匹配即可）
-      if (singerQuery && !song.singers.some(s => s.toLowerCase().includes(singerQuery))) {
-        return false;
+
+      // 歌手搜索
+      if (searchSinger.trim()) {
+        const searchLower = searchSinger.trim().toLowerCase();
+        const hasMatch = song.singers.some(singer =>
+          singer.toLowerCase().includes(searchLower)
+        );
+        if (!hasMatch) return false;
       }
-      // 标签过滤（任一标签匹配即可）
-      if (tagQuery && !song.tags.some(t => t.toLowerCase().includes(tagQuery))) {
-        return false;
+
+      // Tag 搜索
+      if (searchTag.trim()) {
+        const searchLower = searchTag.trim().toLowerCase();
+        const hasMatch = song.tags.some(tag =>
+          tag.toLowerCase().includes(searchLower)
+        );
+        if (!hasMatch) return false;
       }
+
       return true;
     });
-  }, [songs, nameFilter, singerFilter, tagFilter]);
+  }, [songs, searchName, searchSinger, searchTag]);
 
-  const clearFilters = () => {
-    setNameFilter('');
-    setSingerFilter('');
-    setTagFilter('');
-  };
-
-  const resetForm = () => {
-    setName('');
-    setSingersInput('');
-    setTagsInput('');
-    setKey(0);
-  };
-
-  const startEditing = (song: Song) => {
-    setSelectedSong(song);
-    setIsEditing(true);
-    setName(song.name);
-    setSingersInput(song.singers.join(', '));
-    setTagsInput(song.tags.join(', '));
-    setKey(song.key);
-    setShowForm(true);
-  };
-
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setShowForm(false);
-    resetForm();
+  // 清除所有搜索
+  const clearAllFilters = () => {
+    setSearchName('');
+    setSearchSinger('');
+    setSearchTag('');
   };
 
   const addSong = async (e: React.FormEvent) => {
@@ -124,7 +103,10 @@ export default function Home() {
 
       const data = await response.json();
       if (data.success) {
-        resetForm();
+        setName('');
+        setSingersInput('');
+        setTagsInput('');
+        setKey(0);
         setShowForm(false);
         fetchSongs();
       } else {
@@ -133,44 +115,6 @@ export default function Home() {
     } catch (error) {
       console.error('添加歌曲失败:', error);
       alert('添加失败');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateSong = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSong) return;
-
-    setLoading(true);
-    try {
-      const singers = singersInput.split(/[,，]/).map(s => s.trim()).filter(s => s);
-      const tags = tagsInput.split(/[,，]/).map(t => t.trim()).filter(t => t);
-
-      const response = await fetch(`/api/songs/${selectedSong.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          singers,
-          tags,
-          key
-        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setIsEditing(false);
-        setShowForm(false);
-        resetForm();
-        setSelectedSong(data.data);
-        fetchSongs();
-      } else {
-        alert(data.error || '更新失败');
-      }
-    } catch (error) {
-      console.error('更新歌曲失败:', error);
-      alert('更新失败');
     } finally {
       setLoading(false);
     }
@@ -188,6 +132,7 @@ export default function Home() {
       if (data.success) {
         if (selectedSong?.id === id) {
           setSelectedSong(null);
+          setIsEditing(false);
         }
         fetchSongs();
       } else {
@@ -196,6 +141,58 @@ export default function Home() {
     } catch (error) {
       console.error('删除歌曲失败:', error);
       alert('删除失败');
+    }
+  };
+
+  // 开始编辑
+  const startEdit = () => {
+    if (!selectedSong) return;
+    setEditName(selectedSong.name);
+    setEditSingersInput(selectedSong.singers.join(', '));
+    setEditTagsInput(selectedSong.tags.join(', '));
+    setEditKey(selectedSong.key);
+    setIsEditing(true);
+  };
+
+  // 取消编辑
+  const cancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  // 保存编辑
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSong) return;
+
+    setLoading(true);
+    try {
+      const singers = editSingersInput.split(/[,，]/).map(s => s.trim()).filter(s => s);
+      const tags = editTagsInput.split(/[,，]/).map(t => t.trim()).filter(t => t);
+
+      const response = await fetch(`/api/songs/${selectedSong.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName.trim(),
+          singers,
+          tags,
+          key: editKey
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setIsEditing(false);
+        setSelectedSong(data.data);
+        fetchSongs();
+      } else {
+        alert(data.error || '更新失败');
+      }
+    } catch (error) {
+      console.error('更新歌曲失败:', error);
+      alert('更新失败');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -209,163 +206,89 @@ export default function Home() {
     fetchSongs();
   }, []);
 
+  // 搜索框样式
+  const searchInputStyle = {
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    fontSize: '14px',
+    flex: 1,
+    minWidth: '150px'
+  };
+
   return (
-    <main style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '24px',
-      minHeight: '100vh',
-      background: theme.bg
-    }}>
-      <h1 style={{
-        fontSize: '32px',
-        fontWeight: 'bold',
-        marginBottom: '24px',
-        color: theme.primary
-      }}>
-        🥕 我的歌单
+    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+      <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', color: '#333' }}>
+        🎵 我的歌单
       </h1>
 
-      {/* 搜索框区域 */}
+      {/* 搜索区域 */}
       <div style={{
-        background: theme.cardBg,
+        background: '#f8f9fa',
         padding: '20px',
         borderRadius: '12px',
-        marginBottom: '20px',
-        boxShadow: '0 2px 8px rgba(255, 105, 180, 0.15)'
+        marginBottom: '20px'
       }}>
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '16px',
-          marginBottom: '16px'
-        }}>
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '6px',
-              fontSize: '14px',
-              color: theme.textSecondary,
-              fontWeight: 'bold'
-            }}>
-              搜索歌名
-            </label>
-            <input
-              type="text"
-              value={nameFilter}
-              onChange={(e) => setNameFilter(e.target.value)}
-              placeholder="输入歌名..."
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
-                fontSize: '14px',
-                boxSizing: 'border-box',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
-          </div>
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '6px',
-              fontSize: '14px',
-              color: theme.textSecondary,
-              fontWeight: 'bold'
-            }}>
-              搜索歌手
-            </label>
-            <input
-              type="text"
-              value={singerFilter}
-              onChange={(e) => setSingerFilter(e.target.value)}
-              placeholder="输入歌手..."
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
-                fontSize: '14px',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
-            />
-          </div>
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '6px',
-              fontSize: '14px',
-              color: theme.textSecondary,
-              fontWeight: 'bold'
-            }}>
-              搜索标签
-            </label>
-            <input
-              type="text"
-              value={tagFilter}
-              onChange={(e) => setTagFilter(e.target.value)}
-              placeholder="输入标签..."
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
-                fontSize: '14px',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
-            />
-          </div>
-        </div>
-
-        <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          gap: '12px',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          marginBottom: '12px'
         }}>
+          <input
+            type="text"
+            placeholder="搜索歌名..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            style={searchInputStyle}
+          />
+          <input
+            type="text"
+            placeholder="搜索歌手..."
+            value={searchSinger}
+            onChange={(e) => setSearchSinger(e.target.value)}
+            style={searchInputStyle}
+          />
+          <input
+            type="text"
+            placeholder="搜索标签..."
+            value={searchTag}
+            onChange={(e) => setSearchTag(e.target.value)}
+            style={searchInputStyle}
+          />
           <button
-            onClick={clearFilters}
+            onClick={clearAllFilters}
             style={{
-              background: 'transparent',
-              color: theme.primary,
-              border: `2px solid ${theme.primary}`,
-              padding: '8px 16px',
-              borderRadius: '6px',
+              background: '#6c757d',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '14px',
-              fontWeight: 'bold'
+              whiteSpace: 'nowrap'
             }}
           >
-            🗑️ Remove all filters
+            清除搜索
           </button>
-          <span style={{ color: theme.textSecondary, fontSize: '14px' }}>
-            共 <strong style={{ color: theme.primary }}>{songs.length}</strong> 首歌
-            {filteredSongs.length !== songs.length && (
-              <>，展示 <strong style={{ color: theme.primary }}>{filteredSongs.length}</strong> 首</>
-            )}
-          </span>
+        </div>
+        <div style={{ color: '#666', fontSize: '14px' }}>
+          共 <strong>{songs.length}</strong> 首歌 / 展示 <strong>{filteredSongs.length}</strong> 首歌
         </div>
       </div>
 
       <button
-        onClick={() => {
-          if (isEditing) cancelEditing();
-          else setShowForm(!showForm);
-        }}
+        onClick={() => setShowForm(!showForm)}
         style={{
-          background: theme.primary,
+          background: '#4CAF50',
           color: 'white',
           border: 'none',
           padding: '12px 24px',
           borderRadius: '8px',
           cursor: 'pointer',
           fontSize: '16px',
-          marginBottom: '24px',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 8px rgba(255, 105, 180, 0.3)'
+          marginBottom: '24px'
         }}
       >
         {showForm ? '取消' : '+ 添加歌曲'}
@@ -373,32 +296,16 @@ export default function Home() {
 
       {showForm && (
         <form
-          onSubmit={isEditing ? updateSong : addSong}
+          onSubmit={addSong}
           style={{
-            background: theme.cardBg,
+            background: '#f5f5f5',
             padding: '24px',
             borderRadius: '12px',
-            marginBottom: '24px',
-            boxShadow: '0 2px 8px rgba(255, 105, 180, 0.15)',
-            border: `2px solid ${theme.border}`
+            marginBottom: '24px'
           }}
         >
-          <h3 style={{
-            marginTop: 0,
-            marginBottom: '20px',
-            color: theme.primary,
-            fontSize: '20px'
-          }}>
-            {isEditing ? '✏️ 编辑歌曲' : '🎵 添加新歌曲'}
-          </h3>
-
           <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: theme.text
-            }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               歌曲名称 *
             </label>
             <input
@@ -407,12 +314,11 @@ export default function Home() {
               onChange={(e) => setName(e.target.value)}
               style={{
                 width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
+                padding: '10px',
+                borderRadius: '6px',
+                border: '1px solid #ddd',
                 fontSize: '16px',
-                boxSizing: 'border-box',
-                outline: 'none'
+                boxSizing: 'border-box'
               }}
               placeholder="输入歌曲名称"
               required
@@ -420,12 +326,7 @@ export default function Home() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: theme.text
-            }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               参考歌手 *（多个用逗号分隔）
             </label>
             <input
@@ -434,12 +335,11 @@ export default function Home() {
               onChange={(e) => setSingersInput(e.target.value)}
               style={{
                 width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
+                padding: '10px',
+                borderRadius: '6px',
+                border: '1px solid #ddd',
                 fontSize: '16px',
-                boxSizing: 'border-box',
-                outline: 'none'
+                boxSizing: 'border-box'
               }}
               placeholder="如：小时姑娘，winky诗"
               required
@@ -447,12 +347,7 @@ export default function Home() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: theme.text
-            }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               标签（多个用逗号分隔）
             </label>
             <input
@@ -461,24 +356,18 @@ export default function Home() {
               onChange={(e) => setTagsInput(e.target.value)}
               style={{
                 width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: `2px solid ${theme.border}`,
+                padding: '10px',
+                borderRadius: '6px',
+                border: '1px solid #ddd',
                 fontSize: '16px',
-                boxSizing: 'border-box',
-                outline: 'none'
+                boxSizing: 'border-box'
               }}
               placeholder="如：古风，对唱，三拍子，原耽"
             />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: theme.text
-            }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               升降调
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -486,25 +375,22 @@ export default function Home() {
                 type="button"
                 onClick={() => setKey(k => k - 1)}
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '50%',
-                  border: `2px solid ${theme.primary}`,
+                  border: '1px solid #ddd',
                   background: 'white',
-                  color: theme.primary,
                   cursor: 'pointer',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
+                  fontSize: '20px'
                 }}
               >
                 -
               </button>
               <span style={{
-                fontSize: '20px',
+                fontSize: '18px',
                 fontWeight: 'bold',
                 minWidth: '60px',
-                textAlign: 'center',
-                color: theme.primary
+                textAlign: 'center'
               }}>
                 {formatKey(key)}
               </span>
@@ -512,15 +398,13 @@ export default function Home() {
                 type="button"
                 onClick={() => setKey(k => k + 1)}
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '50%',
-                  border: `2px solid ${theme.primary}`,
+                  border: '1px solid #ddd',
                   background: 'white',
-                  color: theme.primary,
                   cursor: 'pointer',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
+                  fontSize: '20px'
                 }}
               >
                 +
@@ -532,103 +416,78 @@ export default function Home() {
             type="submit"
             disabled={loading}
             style={{
-              background: loading ? '#ccc' : theme.primary,
+              background: loading ? '#ccc' : '#2196F3',
               color: 'white',
               border: 'none',
-              padding: '14px 32px',
+              padding: '12px 32px',
               borderRadius: '8px',
               cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              width: '100%'
+              fontSize: '16px'
             }}
           >
-            {loading ? (isEditing ? '更新中...' : '保存中...') : (isEditing ? '更新歌曲' : '保存歌曲')}
+            {loading ? '保存中...' : '保存'}
           </button>
         </form>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         <div>
-          <h2 style={{
-            fontSize: '18px',
-            marginBottom: '16px',
-            color: theme.text
-          }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>
             歌曲列表 ({filteredSongs.length}/{songs.length})
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {filteredSongs.map((song) => (
               <div
                 key={song.id}
-                onClick={() => setSelectedSong(song)}
+                onClick={() => {
+                  setSelectedSong(song);
+                  setIsEditing(false);
+                }}
                 style={{
-                  background: selectedSong?.id === song.id ? theme.primaryLight : theme.cardBg,
+                  background: selectedSong?.id === song.id ? '#e3f2fd' : 'white',
                   padding: '16px',
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(255, 105, 180, 0.1)',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   cursor: 'pointer',
-                  border: selectedSong?.id === song.id ? `2px solid ${theme.primary}` : '2px solid transparent',
-                  transition: 'all 0.2s'
+                  border: selectedSong?.id === song.id ? '2px solid #2196F3' : '2px solid transparent'
                 }}
               >
-                <div style={{
-                  fontWeight: 'bold',
-                  fontSize: '18px',
-                  marginBottom: '10px',
-                  color: theme.text
-                }}>
+                <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
                   {song.name}
                 </div>
-
-                {/* 歌手 - 紫色标签 */}
-                <div style={{
-                  display: 'flex',
-                  gap: '6px',
-                  flexWrap: 'wrap',
-                  marginBottom: '8px'
-                }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
                   {song.singers.map((singer, i) => (
                     <span
                       key={i}
                       style={{
-                        background: theme.singerBg,
-                        color: theme.singer,
+                        background: '#f3e5f5',
+                        color: '#7b1fa2',
                         padding: '4px 10px',
                         borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
+                        fontSize: '12px'
                       }}
                     >
                       {singer}
                     </span>
                   ))}
                 </div>
-
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  flexWrap: 'wrap',
-                  alignItems: 'center'
-                }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{
-                    background: theme.primaryLight,
-                    color: theme.primary,
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
+                    background: '#e0e0e0',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '12px'
                   }}>
-                    {formatKey(song.key)}
+                    调: {formatKey(song.key)}
                   </span>
                   {song.tags.map((tag, i) => (
                     <span
                       key={i}
                       style={{
-                        background: theme.tagBg,
-                        color: theme.tag,
-                        padding: '4px 10px',
-                        borderRadius: '12px',
+                        background: '#e8f5e9',
+                        color: '#2e7d32',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
                         fontSize: '12px'
                       }}
                     >
@@ -639,170 +498,272 @@ export default function Home() {
               </div>
             ))}
             {filteredSongs.length === 0 && (
-              <div style={{
-                background: theme.cardBg,
-                padding: '40px',
-                borderRadius: '12px',
-                textAlign: 'center',
-                color: theme.textSecondary
-              }}>
+              <p style={{ color: '#999', textAlign: 'center', padding: '40px' }}>
                 {songs.length === 0 ? '还没有歌曲，添加一首吧！' : '没有匹配的歌曲'}
-              </div>
+              </p>
             )}
           </div>
         </div>
 
         <div>
           {selectedSong ? (
-            <div style={{
-              background: theme.cardBg,
-              padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(255, 105, 180, 0.15)',
-              border: `2px solid ${theme.border}`
-            }}>
-              <h2 style={{
-                fontSize: '24px',
-                marginBottom: '16px',
-                color: theme.primary
-              }}>
-                {selectedSong.name}
-              </h2>
+            isEditing ? (
+              // 编辑模式
+              <form
+                onSubmit={saveEdit}
+                style={{
+                  background: 'white',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+              >
+                <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>编辑歌曲</h2>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  color: theme.textSecondary,
-                  fontSize: '14px',
-                  display: 'block',
-                  marginBottom: '8px'
-                }}>
-                  参考歌手
-                </label>
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  flexWrap: 'wrap'
-                }}>
-                  {selectedSong.singers.map((singer, i) => (
-                    <span
-                      key={i}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    歌曲名称 *
+                  </label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '6px',
+                      border: '1px solid #ddd',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                    required
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    参考歌手 *（多个用逗号分隔）
+                  </label>
+                  <input
+                    type="text"
+                    value={editSingersInput}
+                    onChange={(e) => setEditSingersInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '6px',
+                      border: '1px solid #ddd',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                    required
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    标签（多个用逗号分隔）
+                  </label>
+                  <input
+                    type="text"
+                    value={editTagsInput}
+                    onChange={(e) => setEditTagsInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '6px',
+                      border: '1px solid #ddd',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    升降调
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setEditKey(k => k - 1)}
                       style={{
-                        background: theme.singerBg,
-                        color: theme.singer,
-                        padding: '6px 14px',
-                        borderRadius: '16px',
-                        fontSize: '14px',
-                        fontWeight: 'bold'
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        border: '1px solid #ddd',
+                        background: 'white',
+                        cursor: 'pointer',
+                        fontSize: '20px'
                       }}
                     >
-                      {singer}
+                      -
+                    </button>
+                    <span style={{
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      minWidth: '60px',
+                      textAlign: 'center'
+                    }}>
+                      {formatKey(editKey)}
                     </span>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setEditKey(k => k + 1)}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        border: '1px solid #ddd',
+                        background: 'white',
+                        cursor: 'pointer',
+                        fontSize: '20px'
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  color: theme.textSecondary,
-                  fontSize: '14px',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  升降调
-                </label>
-                <div style={{
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  color: theme.primary
-                }}>
-                  {formatKey(selectedSong.key)}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    style={{
+                      flex: 1,
+                      background: '#6c757d',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '16px'
+                    }}
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      flex: 1,
+                      background: loading ? '#ccc' : '#4CAF50',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      fontSize: '16px'
+                    }}
+                  >
+                    {loading ? '保存中...' : '保存'}
+                  </button>
                 </div>
-              </div>
+              </form>
+            ) : (
+              // 查看模式
+              <div style={{
+                background: 'white',
+                padding: '24px',
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
+                <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{selectedSong.name}</h2>
 
-              {selectedSong.tags.length > 0 && (
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{
-                    color: theme.textSecondary,
-                    fontSize: '14px',
-                    display: 'block',
-                    marginBottom: '8px'
-                  }}>
-                    标签
-                  </label>
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    flexWrap: 'wrap'
-                  }}>
-                    {selectedSong.tags.map((tag, i) => (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ color: '#666', fontSize: '14px' }}>参考歌手</label>
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {selectedSong.singers.map((singer, i) => (
                       <span
                         key={i}
                         style={{
-                          background: theme.tagBg,
-                          color: theme.tag,
+                          background: '#f3e5f5',
+                          color: '#7b1fa2',
                           padding: '6px 14px',
                           borderRadius: '16px',
                           fontSize: '14px'
                         }}
                       >
-                        {tag}
+                        {singer}
                       </span>
                     ))}
                   </div>
                 </div>
-              )}
 
-              <div style={{
-                color: theme.textSecondary,
-                fontSize: '12px',
-                marginBottom: '20px'
-              }}>
-                添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
-              </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ color: '#666', fontSize: '14px' }}>升降调</label>
+                  <div style={{ fontSize: '18px', marginTop: '4px', fontWeight: 'bold', color: '#2196F3' }}>
+                    {formatKey(selectedSong.key)}
+                  </div>
+                </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  onClick={() => startEditing(selectedSong)}
-                  style={{
-                    flex: 1,
-                    background: theme.primary,
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  ✏️ 编辑
-                </button>
-                <button
-                  onClick={() => removeSong(selectedSong.id)}
-                  style={{
-                    flex: 1,
-                    background: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  🗑️ 删除
-                </button>
+                {selectedSong.tags.length > 0 && (
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ color: '#666', fontSize: '14px' }}>标签</label>
+                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {selectedSong.tags.map((tag, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            background: '#e8f5e9',
+                            color: '#2e7d32',
+                            padding: '6px 12px',
+                            borderRadius: '16px',
+                            fontSize: '14px'
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ color: '#999', fontSize: '12px', marginBottom: '24px' }}>
+                  添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={startEdit}
+                    style={{
+                      flex: 1,
+                      background: '#2196F3',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '16px'
+                    }}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    onClick={() => removeSong(selectedSong.id)}
+                    style={{
+                      flex: 1,
+                      background: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '16px'
+                    }}
+                  >
+                    删除
+                  </button>
+                </div>
               </div>
-            </div>
+            )
           ) : (
             <div style={{
-              background: theme.cardBg,
+              background: '#f5f5f5',
               padding: '40px',
               borderRadius: '12px',
               textAlign: 'center',
-              color: theme.textSecondary,
-              boxShadow: '0 2px 8px rgba(255, 105, 180, 0.1)'
+              color: '#999'
             }}>
               点击左侧歌曲查看详情
             </div>

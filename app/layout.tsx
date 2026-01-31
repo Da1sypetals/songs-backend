@@ -1,6 +1,4 @@
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
+export const metadata = {
   title: '我的歌单',
   description: '记录我会唱的歌曲',
   icons: {
