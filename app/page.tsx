@@ -539,7 +539,7 @@ export default function Home() {
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              参考歌手 *（多个用逗号分隔）
+              参考歌手 *（多个用逗号分隔，中英文逗号均可）
             </label>
             <input
               type="text"
@@ -560,7 +560,7 @@ export default function Home() {
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              标签（多个用逗号分隔）
+              标签（多个用逗号分隔，中英文逗号均可）
             </label>
             <input
               type="text"
@@ -773,7 +773,7 @@ export default function Home() {
 
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    参考歌手 *（多个用逗号分隔）
+                    参考歌手 *（多个用逗号分隔，中英文逗号均可）
                   </label>
                   <input
                     type="text"
@@ -793,7 +793,7 @@ export default function Home() {
 
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    标签（多个用逗号分隔）
+                    标签（多个用逗号分隔，中英文逗号均可）
                   </label>
                   <input
                     type="text"
