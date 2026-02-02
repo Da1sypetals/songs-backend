@@ -4,6 +4,7 @@ export interface Song {
   singers: string[];
   tags: string[];
   key: number;
+  notes?: string;
   createdAt: string;
 }
 
@@ -12,4 +13,5 @@ export interface CreateSongRequest {
   singers: string[];
   tags: string[];
   key: number;
+  notes?: string;
 }
