@@ -9,32 +9,32 @@ const redis = Redis.fromEnv();
 export async function GET() {
   try {
     const keys = await redis.keys('song:*');
-    
+
     if (keys.length === 0) {
       return NextResponse.json({
         success: true,
         data: []
       });
     }
-    
+
     // 使用 pipeline 批量获取所有歌曲
     const pipeline = redis.pipeline();
     for (const key of keys) {
       pipeline.get(key);
     }
-    
+
     const results = await pipeline.exec();
     const songs: Song[] = [];
-    
+
     for (const result of results) {
       if (result) {
         songs.push(result as Song);
       }
     }
-    
+
     // 按创建时间排序
     songs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     return NextResponse.json({
       success: true,
       data: songs
@@ -51,22 +51,22 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, singers, tags, key } = body;
-    
+    const { name, singers, tags, key, notes } = body;
+
     if (!name || !name.trim()) {
       return NextResponse.json({
         success: false,
         error: '歌曲名称是必填项'
       }, { status: 400 });
     }
-    
+
     if (!singers || !Array.isArray(singers) || singers.length === 0) {
       return NextResponse.json({
         success: false,
         error: '至少需要一个参考歌手'
       }, { status: 400 });
     }
-    
+
     const id = uuidv4();
     const song: Song = {
       id,
@@ -74,11 +74,12 @@ export async function POST(request: NextRequest) {
       singers: singers.filter((s: string) => s.trim()).map((s: string) => s.trim()),
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: typeof key === 'number' ? key : 0,
+      notes: notes?.trim() || undefined,
       createdAt: new Date().toISOString()
     };
-    
+
     await redis.set(`song:${id}`, song);
-    
+
     return NextResponse.json({
       success: true,
       data: song

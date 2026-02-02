@@ -39,6 +39,7 @@ export default function Home() {
   const [singersInput, setSingersInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [key, setKey] = useState(0);
+  const [notes, setNotes] = useState('');
 
   // 搜索框状态
   const [searchName, setSearchName] = useState('');
@@ -53,6 +54,7 @@ export default function Home() {
   const [editSingersInput, setEditSingersInput] = useState('');
   const [editTagsInput, setEditTagsInput] = useState('');
   const [editKey, setEditKey] = useState(0);
+  const [editNotes, setEditNotes] = useState('');
 
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -180,7 +182,8 @@ export default function Home() {
         name,
         singers,
         tags,
-        key
+        key,
+        notes: notes.trim() || undefined
       };
 
       const response = await fetch('/api/songs', {
@@ -195,6 +198,7 @@ export default function Home() {
         setSingersInput('');
         setTagsInput('');
         setKey(0);
+        setNotes('');
         setShowForm(false);
         fetchSongs(true);
       } else {
@@ -243,6 +247,7 @@ export default function Home() {
     setEditSingersInput(selectedSong.singers.join(', '));
     setEditTagsInput(selectedSong.tags.join(', '));
     setEditKey(selectedSong.key);
+    setEditNotes(selectedSong.notes || '');
     setIsEditing(true);
   };
 
@@ -272,7 +277,8 @@ export default function Home() {
           name: editName.trim(),
           singers,
           tags,
-          key: editKey
+          key: editKey,
+          notes: editNotes.trim() || undefined
         })
       });
 
@@ -302,718 +308,1317 @@ export default function Home() {
     fetchSongs();
   }, []);
 
-  // 搜索框样式
+  // 搜索框样式 - 浅粉色主题
   const searchInputStyle = {
-    padding: '10px 14px',
-    borderRadius: '8px',
-    border: '1px solid #ddd',
+    padding: '12px 16px',
+    borderRadius: '20px',
+    border: '2px solid #ffd6e7',
     fontSize: '14px',
     flex: 1,
-    minWidth: '150px'
+    minWidth: '150px',
+    background: '#fff8fb',
+    outline: 'none',
+    transition: 'all 0.3s ease'
   };
 
   return (
-    <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-      {/* 登录弹窗 */}
-      {showLoginModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #fff0f5 0%, #ffe4ed 50%, #fff5f8 100%)'
+    }}>
+      <main style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '24px',
+        minHeight: '100vh'
+      }}>
+        {/* 登录弹窗 */}
+        {showLoginModal && (
           <div style={{
-            background: 'white',
-            padding: '32px',
-            borderRadius: '12px',
-            width: '90%',
-            maxWidth: '360px'
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(255, 182, 193, 0.4)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
           }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '20px' }}>请输入密码</h2>
-            <input
-              type="password"
-              placeholder="密码"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                marginBottom: '12px',
-                boxSizing: 'border-box'
-              }}
-            />
-            {loginError && (
-              <p style={{ color: '#f44336', fontSize: '14px', marginBottom: '12px' }}>{loginError}</p>
-            )}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={() => setShowLoginModal(false)}
+            <div style={{
+              background: 'linear-gradient(145deg, #fff5f8 0%, #ffe8f0 100%)',
+              padding: '36px',
+              borderRadius: '24px',
+              width: '90%',
+              maxWidth: '360px',
+              boxShadow: '0 8px 32px rgba(255, 107, 157, 0.2)',
+              border: '2px solid #ffd6e7'
+            }}>
+              <h2 style={{
+                fontSize: '22px',
+                marginBottom: '24px',
+                color: '#ff6b9d',
+                textAlign: 'center',
+                fontWeight: 'bold'
+              }}>请输入密码</h2>
+              <input
+                type="password"
+                placeholder="密码"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                 style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid #ddd',
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontSize: '14px'
+                  width: '100%',
+                  padding: '14px 18px',
+                  borderRadius: '20px',
+                  border: '2px solid #ffd6e7',
+                  fontSize: '16px',
+                  marginBottom: '16px',
+                  boxSizing: 'border-box',
+                  background: '#fff8fb',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
                 }}
-              >
-                取消
-              </button>
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              {loginError && (
+                <p style={{
+                  color: '#ff4757',
+                  fontSize: '14px',
+                  marginBottom: '16px',
+                  textAlign: 'center',
+                  background: '#ffe0e0',
+                  padding: '8px',
+                  borderRadius: '8px'
+                }}>{loginError}</p>
+              )}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '20px',
+                    border: '2px solid #ffd6e7',
+                    background: '#fff5f8',
+                    color: '#ff6b9d',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ffe8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#fff5f8';
+                  }}
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleLogin}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 12px rgba(255, 107, 157, 0.3)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 157, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 157, 0.3)';
+                  }}
+                >
+                  进入 ✨
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 标题栏 */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '28px',
+          padding: '20px 28px',
+          background: 'linear-gradient(135deg, #ffffff 0%, #fff5f8 100%)',
+          borderRadius: '20px',
+          boxShadow: '0 4px 20px rgba(255, 107, 157, 0.1)',
+          border: '2px solid #ffd6e7'
+        }}>
+          <h1 style={{
+            fontSize: '34px',
+            fontWeight: 'bold',
+            color: '#ff6b9d',
+            margin: 0,
+            textShadow: '2px 2px 4px rgba(255, 107, 157, 0.15)'
+          }}>
+            🎵 Daisy的歌单
+          </h1>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {isAdmin ? (
+              <>
+                <span style={{
+                  color: '#ff6b9d',
+                  fontSize: '14px',
+                  background: '#ffe8f0',
+                  padding: '6px 12px',
+                  borderRadius: '12px',
+                  fontWeight: 'bold'
+                }}>✨ 已解锁</span>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '20px',
+                    border: '2px solid #ffd6e7',
+                    background: '#fff5f8',
+                    color: '#ff6b9d',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ffe8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#fff5f8';
+                  }}
+                >
+                  退出
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleLogin}
+                onClick={openLoginModal}
                 style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: '8px',
+                  padding: '10px 24px',
+                  borderRadius: '20px',
                   border: 'none',
-                  background: '#2196F3',
+                  background: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
                   color: 'white',
                   cursor: 'pointer',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 12px rgba(255, 107, 157, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 157, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 157, 0.3)';
                 }}
               >
-                进入
+                编辑模式 🔐
               </button>
-            </div>
+            )}
           </div>
         </div>
-      )}
 
-      {/* 标题栏 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#333', margin: 0 }}>
-          🎵 Daisy的歌单
-        </h1>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {isAdmin ? (
-            <>
-              <span style={{ color: '#4CAF50', fontSize: '14px' }}>✓ 已解锁</span>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #ddd',
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                退出
-              </button>
-            </>
-          ) : (
+        {/* 搜索区域 */}
+        <div style={{
+          background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
+          padding: '24px',
+          borderRadius: '20px',
+          marginBottom: '24px',
+          boxShadow: '0 4px 16px rgba(255, 107, 157, 0.08)',
+          border: '2px solid #ffd6e7'
+        }}>
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            marginBottom: '16px'
+          }}>
+            <input
+              type="text"
+              placeholder="🔍 搜索歌名..."
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              style={searchInputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#ff6b9d';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#ffd6e7';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+            <input
+              type="text"
+              placeholder="🎤 搜索歌手..."
+              value={searchSinger}
+              onChange={(e) => setSearchSinger(e.target.value)}
+              style={searchInputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#ff6b9d';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#ffd6e7';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+            <input
+              type="text"
+              placeholder="🏷️ 搜索标签..."
+              value={searchTag}
+              onChange={(e) => setSearchTag(e.target.value)}
+              style={searchInputStyle}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#ff6b9d';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#ffd6e7';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
             <button
-              onClick={openLoginModal}
+              onClick={clearAllFilters}
               style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                border: 'none',
-                background: '#2196F3',
-                color: 'white',
+                background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                color: '#ff6b9d',
+                border: '2px solid #ffd6e7',
+                padding: '12px 24px',
+                borderRadius: '20px',
                 cursor: 'pointer',
-                fontSize: '14px'
+                fontSize: '14px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#ffe8f0';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              编辑模式
+              清除搜索
             </button>
-          )}
-        </div>
-      </div>
-
-      {/* 搜索区域 */}
-      <div style={{
-        background: '#f8f9fa',
-        padding: '20px',
-        borderRadius: '12px',
-        marginBottom: '20px'
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          marginBottom: '12px'
-        }}>
-          <input
-            type="text"
-            placeholder="搜索歌名..."
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            style={searchInputStyle}
-          />
-          <input
-            type="text"
-            placeholder="搜索歌手..."
-            value={searchSinger}
-            onChange={(e) => setSearchSinger(e.target.value)}
-            style={searchInputStyle}
-          />
-          <input
-            type="text"
-            placeholder="搜索标签..."
-            value={searchTag}
-            onChange={(e) => setSearchTag(e.target.value)}
-            style={searchInputStyle}
-          />
-          <button
-            onClick={clearAllFilters}
-            style={{
-              background: '#6c757d',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            清除搜索
-          </button>
-        </div>
-        <div style={{ color: '#666', fontSize: '14px' }}>
-          共 <strong>{songs.length}</strong> 首歌 / 展示 <strong>{filteredSongs.length}</strong> 首歌
-        </div>
-      </div>
-
-      {isAdmin && (
-        <button
-          onClick={() => setShowForm(!showForm)}
-          style={{
-            background: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            marginBottom: '24px'
-          }}
-        >
-          {showForm ? '取消' : '+ 添加歌曲'}
-        </button>
-      )}
-
-      {showForm && (
-        <form
-          onSubmit={addSong}
-          style={{
-            background: '#f5f5f5',
-            padding: '24px',
+          </div>
+          <div style={{
+            color: '#ff8fab',
+            fontSize: '15px',
+            fontWeight: '500',
+            padding: '10px 16px',
+            background: '#fff5f8',
             borderRadius: '12px',
-            marginBottom: '24px'
-          }}
-        >
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              歌曲名称 *
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="输入歌曲名称"
-              required
-            />
+            display: 'inline-block'
+          }}>
+            🎵 共 <strong style={{ color: '#ff6b9d' }}>{songs.length}</strong> 首歌 / 展示 <strong style={{ color: '#ff6b9d' }}>{filteredSongs.length}</strong> 首歌
           </div>
+        </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              参考歌手 *（多个用逗号分隔，中英文逗号均可）
-            </label>
-            <input
-              type="text"
-              value={singersInput}
-              onChange={(e) => setSingersInput(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="如：小时姑娘，winky诗"
-              required
-            />
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              标签（多个用逗号分隔，中英文逗号均可）
-            </label>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="如：古风，对唱，三拍子，原耽"
-            />
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              升降调
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => setKey(k => k - 1)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: '1px solid #ddd',
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontSize: '20px'
-                }}
-              >
-                -
-              </button>
-              <span style={{
-                fontSize: '18px',
-                fontWeight: 'bold',
-                minWidth: '60px',
-                textAlign: 'center'
-              }}>
-                {formatKey(key)}
-              </span>
-              <button
-                type="button"
-                onClick={() => setKey(k => k + 1)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  border: '1px solid #ddd',
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontSize: '20px'
-                }}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
+        {isAdmin && (
           <button
-            type="submit"
-            disabled={loading}
+            onClick={() => setShowForm(!showForm)}
             style={{
-              background: loading ? '#ccc' : '#2196F3',
+              background: showForm ? '#6c757d' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
               color: 'white',
               border: 'none',
-              padding: '12px 32px',
-              borderRadius: '8px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '16px'
+              padding: '14px 28px',
+              borderRadius: '24px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '24px',
+              boxShadow: showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              if (!showForm) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)';
             }}
           >
-            {loading ? '保存中...' : '保存'}
+            {showForm ? '取消' : '添加歌曲'}
           </button>
-        </form>
-      )}
+        )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
-        <div>
-          <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>
-            歌曲列表 ({filteredSongs.length}/{songs.length})
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredSongs.map((song) => (
-              <div
-                key={song.id}
-                onClick={() => {
-                  setSelectedSong(song);
-                  setIsEditing(false);
-                }}
+        {showForm && (
+          <form
+            onSubmit={addSong}
+            style={{
+              background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
+              padding: '28px',
+              borderRadius: '24px',
+              marginBottom: '24px',
+              boxShadow: '0 4px 20px rgba(255, 107, 157, 0.12)',
+              border: '2px solid #ffd6e7'
+            }}
+          >
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '10px',
+                fontWeight: 'bold',
+                color: '#ff6b9d'
+              }}>
+                🎵 歌曲名称 *
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 style={{
-                  background: selectedSong?.id === song.id ? '#e3f2fd' : 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  cursor: 'pointer',
-                  border: selectedSong?.id === song.id ? '2px solid #2196F3' : '2px solid transparent'
+                  width: '100%',
+                  padding: '14px 18px',
+                  borderRadius: '16px',
+                  border: '2px solid #ffd6e7',
+                  fontSize: '16px',
+                  boxSizing: 'border-box',
+                  background: '#fff8fb',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
                 }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
-                  {song.name}
-                </div>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                  {song.singers.map((singer, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        background: '#f3e5f5',
-                        color: '#7b1fa2',
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        fontSize: '12px'
-                      }}
-                    >
-                      {singer}
-                    </span>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    background: '#e0e0e0',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '12px'
-                  }}>
-                    key: {formatKey(song.key)}
-                  </span>
-                  {song.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        background: '#e8f5e9',
-                        color: '#2e7d32',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px'
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                placeholder="输入歌曲名称"
+                required
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '10px',
+                fontWeight: 'bold',
+                color: '#ff6b9d'
+              }}>
+                🎤 参考歌手 *（多个用逗号分隔，中英文逗号均可）
+              </label>
+              <input
+                type="text"
+                value={singersInput}
+                onChange={(e) => setSingersInput(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '14px 18px',
+                  borderRadius: '16px',
+                  border: '2px solid #ffd6e7',
+                  fontSize: '16px',
+                  boxSizing: 'border-box',
+                  background: '#fff8fb',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="如：小时姑娘，winky诗"
+                required
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '10px',
+                fontWeight: 'bold',
+                color: '#ff6b9d'
+              }}>
+                🏷️ 标签（多个用逗号分隔，中英文逗号均可）
+              </label>
+              <input
+                type="text"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '14px 18px',
+                  borderRadius: '16px',
+                  border: '2px solid #ffd6e7',
+                  fontSize: '16px',
+                  boxSizing: 'border-box',
+                  background: '#fff8fb',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="如：古风，对唱，三拍子，原耽"
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '16px',
+                fontWeight: 'bold',
+                color: '#ff6b9d'
+              }}>
+                🎹 升降调
+              </label>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                padding: '12px 16px',
+                background: '#fff5f8',
+                borderRadius: '16px',
+                border: '2px solid #ffd6e7',
+                width: 'fit-content'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setKey(k => k - 1)}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    border: '2px solid #ff6b9d',
+                    background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                    color: '#ff6b9d',
+                    cursor: 'pointer',
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  −
+                </button>
+                <span style={{
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  minWidth: '60px',
+                  textAlign: 'center',
+                  color: '#ff6b9d'
+                }}>
+                  {formatKey(key)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setKey(k => k + 1)}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    border: '2px solid #ff6b9d',
+                    background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                    color: '#ff6b9d',
+                    cursor: 'pointer',
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  +
+                </button>
               </div>
-            ))}
-            {isLoadingSongs ? (
-              <div style={{ textAlign: 'center', padding: '60px' }}>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
+                📝 备注
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '16px',
+                  border: '2px solid #ffcce0',
+                  fontSize: '15px',
+                  boxSizing: 'border-box',
+                  resize: 'vertical',
+                  minHeight: '80px',
+                  background: '#fff5f8',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="可以写点什么... ✨ (可选)"
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffcce0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                background: loading ? '#ffd6e7' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '14px 36px',
+                borderRadius: '24px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                boxShadow: loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 157, 0.35)';
+                }
+              }}
+            >
+              {loading ? '保存中... 💾' : '保存 '}
+            </button>
+          </form>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+          <div>
+            <h2 style={{
+              fontSize: '22px',
+              marginBottom: '18px',
+              color: '#ff6b9d',
+              fontWeight: 'bold',
+              padding: '0 8px'
+            }}>
+              🎶 歌曲列表 ({filteredSongs.length}/{songs.length})
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {filteredSongs.map((song) => (
+                <div
+                  key={song.id}
+                  onClick={() => {
+                    setSelectedSong(song);
+                    setIsEditing(false);
+                  }}
+                  style={{
+                    background: selectedSong?.id === song.id
+                      ? 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)'
+                      : 'linear-gradient(135deg, #ffffff 0%, #fffafc 100%)',
+                    padding: '20px',
+                    borderRadius: '18px',
+                    boxShadow: selectedSong?.id === song.id
+                      ? '0 4px 16px rgba(255, 107, 157, 0.25)'
+                      : '0 2px 8px rgba(255, 107, 157, 0.08)',
+                    cursor: 'pointer',
+                    border: selectedSong?.id === song.id ? '2px solid #ff6b9d' : '2px solid #ffe8f0',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedSong?.id !== song.id) {
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 157, 0.15)';
+                      e.currentTarget.style.border = '2px solid #ffd6e7';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedSong?.id !== song.id) {
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 107, 157, 0.08)';
+                      e.currentTarget.style.border = '2px solid #ffe8f0';
+                    }
+                  }}
+                >
+                  <div style={{
+                    fontWeight: 'bold',
+                    fontSize: '19px',
+                    marginBottom: '10px',
+                    color: '#333'
+                  }}>
+                    {song.name}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                    {song.singers.map((singer, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+                          color: '#8b7bf7',
+                          padding: '6px 14px',
+                          borderRadius: '14px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          border: '1px solid #ddd6fe'
+                        }}
+                      >
+                        🎤 {singer}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f4f8 100%)',
+                      color: '#6bb3c7',
+                      padding: '6px 14px',
+                      borderRadius: '14px',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      border: '2px solid #6bb3c7'
+                    }}>
+                      🎹 {formatKey(song.key)}
+                    </span>
+                    {song.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          background: 'linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%)',
+                          color: '#2e7d32',
+                          padding: '6px 14px',
+                          borderRadius: '14px',
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        🏷️ {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {isLoadingSongs ? (
                 <div style={{
-                  width: '40px',
-                  height: '40px',
-                  border: '4px solid #f3f3f3',
-                  borderTop: '4px solid #2196F3',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite',
-                  margin: '0 auto 16px'
-                }} />
-                <style>{`
+                  textAlign: 'center',
+                  padding: '80px 40px',
+                  background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                  borderRadius: '20px',
+                  border: '2px dashed #ffd6e7'
+                }}>
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    border: '4px solid #ffe8f0',
+                    borderTop: '4px solid #ff6b9d',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto 20px'
+                  }} />
+                  <style>{`
                   @keyframes spin {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                   }
                 `}</style>
-                <p style={{ color: '#666' }}>加载中...</p>
-              </div>
-            ) : filteredSongs.length === 0 && (
-              <p style={{ color: '#999', textAlign: 'center', padding: '40px' }}>
-                {songs.length === 0 ? '还没有歌曲，添加一首吧！' : '没有匹配的歌曲'}
-              </p>
-            )}
+                  <p style={{ color: '#ff8fab', fontSize: '16px' }}>正在加载歌曲...</p>
+                </div>
+              ) : filteredSongs.length === 0 && (
+                <div style={{
+                  padding: '60px 40px',
+                  background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                  borderRadius: '20px',
+                  textAlign: 'center',
+                  border: '2px dashed #ffd6e7'
+                }}>
+                  <p style={{
+                    color: '#ff6b9d',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    margin: 0
+                  }}>
+                    {songs.length === 0 ? '还没有歌曲，添加一首吧！' : '🔍 没有匹配的歌曲'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div style={{ position: 'sticky', top: '20px' }}>
-          {selectedSong ? (
-            isEditing ? (
-              // 编辑模式
-              <form
-                onSubmit={saveEdit}
-                style={{
-                  background: 'white',
-                  padding: '24px',
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}
-              >
-                <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>编辑歌曲</h2>
+          <div style={{
+            position: 'sticky',
+            top: '24px'
+          }}>
+            {selectedSong ? (
+              isEditing ? (
+                // 编辑模式
+                <form
+                  onSubmit={saveEdit}
+                  style={{
+                    background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
+                    padding: '28px',
+                    borderRadius: '24px',
+                    boxShadow: '0 4px 20px rgba(255, 107, 157, 0.15)',
+                    border: '2px solid #ffd6e7'
+                  }}
+                >
+                  <h2 style={{
+                    fontSize: '24px',
+                    marginBottom: '24px',
+                    color: '#ff6b9d',
+                    fontWeight: 'bold'
+                  }}>编辑歌曲</h2>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    歌曲名称 *
-                  </label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    参考歌手 *（多个用逗号分隔，中英文逗号均可）
-                  </label>
-                  <input
-                    type="text"
-                    value={editSingersInput}
-                    onChange={(e) => setEditSingersInput(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    标签（多个用逗号分隔，中英文逗号均可）
-                  </label>
-                  <input
-                    type="text"
-                    value={editTagsInput}
-                    onChange={(e) => setEditTagsInput(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    升降调
-                  </label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setEditKey(k => k - 1)}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        border: '1px solid #ddd',
-                        background: 'white',
-                        cursor: 'pointer',
-                        fontSize: '20px'
-                      }}
-                    >
-                      -
-                    </button>
-                    <span style={{
-                      fontSize: '18px',
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '10px',
                       fontWeight: 'bold',
-                      minWidth: '60px',
-                      textAlign: 'center'
+                      color: '#ff6b9d'
                     }}>
-                      {formatKey(editKey)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setEditKey(k => k + 1)}
+                      🎵 歌曲名称 *
+                    </label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
                       style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        border: '1px solid #ddd',
-                        background: 'white',
-                        cursor: 'pointer',
-                        fontSize: '20px'
+                        width: '100%',
+                        padding: '14px 18px',
+                        borderRadius: '16px',
+                        border: '2px solid #ffd6e7',
+                        fontSize: '16px',
+                        boxSizing: 'border-box',
+                        background: '#fff8fb',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
                       }}
-                    >
-                      +
-                    </button>
+                      required
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffd6e7';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    style={{
-                      flex: 1,
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '16px'
-                    }}
-                  >
-                    取消
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                      flex: 1,
-                      background: loading ? '#ccc' : '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '8px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      fontSize: '16px'
-                    }}
-                  >
-                    {loading ? '保存中...' : '保存'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              // 查看模式
-              <div style={{
-                background: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{selectedSong.name}</h2>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '10px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d'
+                    }}>
+                      🎤 参考歌手 *（多个用逗号分隔，中英文逗号均可）
+                    </label>
+                    <input
+                      type="text"
+                      value={editSingersInput}
+                      onChange={(e) => setEditSingersInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '14px 18px',
+                        borderRadius: '16px',
+                        border: '2px solid #ffd6e7',
+                        fontSize: '16px',
+                        boxSizing: 'border-box',
+                        background: '#fff8fb',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      required
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffd6e7';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ color: '#666', fontSize: '14px' }}>参考歌手</label>
-                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {selectedSong.singers.map((singer, i) => (
-                      <span
-                        key={i}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '10px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d'
+                    }}>
+                      🏷️ 标签（多个用逗号分隔，中英文逗号均可）
+                    </label>
+                    <input
+                      type="text"
+                      value={editTagsInput}
+                      onChange={(e) => setEditTagsInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '14px 18px',
+                        borderRadius: '16px',
+                        border: '2px solid #ffd6e7',
+                        fontSize: '16px',
+                        boxSizing: 'border-box',
+                        background: '#fff8fb',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffd6e7';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '16px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d'
+                    }}>
+                      🎹 升降调
+                    </label>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '12px 16px',
+                      background: '#fff5f8',
+                      borderRadius: '16px',
+                      border: '2px solid #ffd6e7',
+                      width: 'fit-content'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setEditKey(k => k - 1)}
                         style={{
-                          background: '#f3e5f5',
-                          color: '#7b1fa2',
-                          padding: '6px 14px',
-                          borderRadius: '16px',
-                          fontSize: '14px'
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '50%',
+                          border: '2px solid #ff6b9d',
+                          background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                          color: '#ff6b9d',
+                          cursor: 'pointer',
+                          fontSize: '22px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                          e.currentTarget.style.transform = 'scale(1)';
                         }}
                       >
-                        {singer}
+                        −
+                      </button>
+                      <span style={{
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        minWidth: '60px',
+                        textAlign: 'center',
+                        color: '#ff6b9d'
+                      }}>
+                        {formatKey(editKey)}
                       </span>
-                    ))}
+                      <button
+                        type="button"
+                        onClick={() => setEditKey(k => k + 1)}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '50%',
+                          border: '2px solid #ff6b9d',
+                          background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                          color: '#ff6b9d',
+                          cursor: 'pointer',
+                          fontSize: '22px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ color: '#666', fontSize: '14px' }}>升降调</label>
-                  <div style={{ fontSize: '18px', marginTop: '4px', fontWeight: 'bold', color: '#2196F3' }}>
-                    {formatKey(selectedSong.key)}
-                  </div>
-                </div>
-
-                {selectedSong.tags.length > 0 && (
                   <div style={{ marginBottom: '24px' }}>
-                    <label style={{ color: '#666', fontSize: '14px' }}>标签</label>
-                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {selectedSong.tags.map((tag, i) => (
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
+                      📝 备注
+                    </label>
+                    <textarea
+                      value={editNotes}
+                      onChange={(e) => setEditNotes(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        border: '2px solid #ffcce0',
+                        fontSize: '15px',
+                        boxSizing: 'border-box',
+                        resize: 'vertical',
+                        minHeight: '80px',
+                        background: '#fff5f8',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      placeholder="可以写点什么... ✨ (可选)"
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffcce0';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      style={{
+                        flex: 1,
+                        background: '#fff5f8',
+                        color: '#ff6b9d',
+                        border: '2px solid #ffd6e7',
+                        padding: '14px 24px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#ffe8f0';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#fff5f8';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      style={{
+                        flex: 1,
+                        background: loading ? '#ffd6e7' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '14px 24px',
+                        borderRadius: '20px',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        boxShadow: loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loading) {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)';
+                      }}
+                    >
+                      {loading ? '保存中... 💾' : '保存 '}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                // 查看模式
+                <div style={{
+                  background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
+                  padding: '28px',
+                  borderRadius: '24px',
+                  boxShadow: '0 4px 20px rgba(255, 107, 157, 0.15)',
+                  border: '2px solid #ffd6e7'
+                }}>
+                  <h2 style={{
+                    fontSize: '26px',
+                    marginBottom: '20px',
+                    color: '#ff6b9d',
+                    fontWeight: 'bold'
+                  }}>{selectedSong.name}</h2>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      color: '#ff8fab',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginBottom: '10px'
+                    }}>🎤 参考歌手</label>
+                    <div style={{ marginTop: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {selectedSong.singers.map((singer, i) => (
                         <span
                           key={i}
                           style={{
-                            background: '#e8f5e9',
-                            color: '#2e7d32',
-                            padding: '6px 12px',
+                            background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+                            color: '#8b7bf7',
+                            padding: '8px 16px',
                             borderRadius: '16px',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            border: '1px solid #ddd6fe'
                           }}
                         >
-                          {tag}
+                          {singer}
                         </span>
                       ))}
                     </div>
                   </div>
-                )}
 
-                <div style={{ color: '#999', fontSize: '12px', marginBottom: '24px' }}>
-                  添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
-                </div>
-
-                {isAdmin ? (
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button
-                      onClick={startEdit}
-                      style={{
-                        flex: 1,
-                        background: '#2196F3',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '16px'
-                      }}
-                    >
-                      编辑
-                    </button>
-                    <button
-                      onClick={() => removeSong(selectedSong.id)}
-                      style={{
-                        flex: 1,
-                        background: '#f44336',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '16px'
-                      }}
-                    >
-                      删除
-                    </button>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      color: '#ff8fab',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginBottom: '10px'
+                    }}>🎹 升降调</label>
+                    <div style={{
+                      fontSize: '20px',
+                      marginTop: '12px',
+                      fontWeight: 'bold',
+                      color: '#6bb3c7',
+                      background: '#f0f9ff',
+                      padding: '10px 16px',
+                      borderRadius: '16px',
+                      border: '2px solid #6bb3c7',
+                      display: 'inline-block'
+                    }}>
+                      {formatKey(selectedSong.key)}
+                    </div>
                   </div>
-                ) : (
+
+                  {selectedSong.tags.length > 0 && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <label style={{
+                        display: 'block',
+                        color: '#ff8fab',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        marginBottom: '10px'
+                      }}>🏷️ 标签</label>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {selectedSong.tags.map((tag, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              background: 'linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%)',
+                              color: '#2e7d32',
+                              padding: '8px 16px',
+                              borderRadius: '16px',
+                              fontSize: '14px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ color: '#ff6b9d', fontSize: '14px', fontWeight: 'bold' }}>📝 备注</label>
+                    <div style={{
+                      marginTop: '10px',
+                      padding: '16px 20px',
+                      background: selectedSong.notes ? 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)' : '#f8f9fa',
+                      borderRadius: '18px',
+                      border: '2px solid ' + (selectedSong.notes ? '#ffd6e7' : '#e9ecef'),
+                      minHeight: selectedSong.notes ? 'auto' : '60px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      <span style={{
+                        fontSize: '15px',
+                        color: selectedSong.notes ? '#ff6b9d' : '#adb5bd',
+                        lineHeight: '1.6'
+                      }}>
+                        {selectedSong.notes ? selectedSong.notes : '无备注~'}
+                      </span>
+                    </div>
+                  </div>
+
                   <div style={{
-                    padding: '12px',
-                    background: '#fff3e0',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    color: '#e65100',
-                    fontSize: '14px'
+                    color: '#ff8fab',
+                    fontSize: '13px',
+                    marginBottom: '24px',
+                    padding: '12px 16px',
+                    background: '#fff0f5',
+                    borderRadius: '12px',
+                    border: '1px dashed #ffd6e7'
                   }}>
-                    🔒 只读模式（登录后可编辑）
+                    🕐 添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
                   </div>
-                )}
+
+                  {isAdmin ? (
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        onClick={startEdit}
+                        style={{
+                          flex: 1,
+                          background: 'linear-gradient(135deg, #2196F3 0%, #64b5f6 100%)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '14px 24px',
+                          borderRadius: '20px',
+                          cursor: 'pointer',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          boxShadow: '0 4px 16px rgba(33, 150, 243, 0.35)',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.45)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(33, 150, 243, 0.35)';
+                        }}
+                      >
+                        编辑 ✏️
+                      </button>
+                      <button
+                        onClick={() => removeSong(selectedSong.id)}
+                        style={{
+                          flex: 1,
+                          background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '14px 24px',
+                          borderRadius: '20px',
+                          cursor: 'pointer',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          boxShadow: '0 4px 16px rgba(244, 67, 54, 0.35)',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(244, 67, 54, 0.45)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 67, 54, 0.35)';
+                        }}
+                      >
+                        删除 🗑️
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{
+                      padding: '16px',
+                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                      borderRadius: '16px',
+                      textAlign: 'center',
+                      color: '#ff6b9d',
+                      fontSize: '15px',
+                      border: '2px dashed #ffd6e7',
+                      fontWeight: '500'
+                    }}>
+                      🔒 只读模式（点击右上角编辑模式登录后可编辑）
+                    </div>
+                  )}
+                </div>
+              )
+            ) : (
+              <div style={{
+                background: 'linear-gradient(145deg, #fff5f8 0%, #ffe8f0 100%)',
+                padding: '60px 40px',
+                borderRadius: '24px',
+                textAlign: 'center',
+                color: '#ff8fab',
+                border: '2px dashed #ffd6e7',
+                boxShadow: '0 4px 16px rgba(255, 107, 157, 0.08)'
+              }}>
+                <div style={{
+                  fontSize: '48px',
+                  marginBottom: '16px',
+                  opacity: 0.8
+                }}>🎵</div>
+                <p style={{
+                  fontSize: '16px',
+                  margin: 0,
+                  fontWeight: '500'
+                }}>点击左侧歌曲查看详情 ✨</p>
               </div>
-            )
-          ) : (
-            <div style={{
-              background: '#f5f5f5',
-              padding: '40px',
-              borderRadius: '12px',
-              textAlign: 'center',
-              color: '#999'
-            }}>
-              点击左侧歌曲查看详情
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

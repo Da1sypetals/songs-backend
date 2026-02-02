@@ -11,14 +11,14 @@ export async function GET(
 ) {
   try {
     const song = await redis.get<Song>(`song:${params.id}`);
-    
+
     if (!song) {
       return NextResponse.json({
         success: false,
         error: '歌曲不存在'
       }, { status: 404 });
     }
-    
+
     return NextResponse.json({
       success: true,
       data: song
@@ -38,18 +38,18 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { name, singers, tags, key } = body;
-    
+    const { name, singers, tags, key, notes } = body;
+
     // 检查歌曲是否存在
     const existingSong = await redis.get<Song>(`song:${params.id}`);
-    
+
     if (!existingSong) {
       return NextResponse.json({
         success: false,
         error: '歌曲不存在'
       }, { status: 404 });
     }
-    
+
     // 验证必填字段
     if (!name || !name.trim()) {
       return NextResponse.json({
@@ -57,14 +57,14 @@ export async function PUT(
         error: '歌曲名称是必填项'
       }, { status: 400 });
     }
-    
+
     if (!singers || !Array.isArray(singers) || singers.length === 0) {
       return NextResponse.json({
         success: false,
         error: '至少需要一个参考歌手'
       }, { status: 400 });
     }
-    
+
     // 更新歌曲（保留创建时间）
     const updatedSong: Song = {
       id: params.id,
@@ -72,11 +72,12 @@ export async function PUT(
       singers: singers.filter((s: string) => s.trim()).map((s: string) => s.trim()),
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: typeof key === 'number' ? key : 0,
+      notes: notes?.trim() || undefined,
       createdAt: existingSong.createdAt
     };
-    
+
     await redis.set(`song:${params.id}`, updatedSong);
-    
+
     return NextResponse.json({
       success: true,
       data: updatedSong
@@ -96,14 +97,14 @@ export async function DELETE(
 ) {
   try {
     const result = await redis.del(`song:${params.id}`);
-    
+
     if (result === 0) {
       return NextResponse.json({
         success: false,
         error: '歌曲不存在'
       }, { status: 404 });
     }
-    
+
     return NextResponse.json({
       success: true,
       message: '歌曲删除成功'
