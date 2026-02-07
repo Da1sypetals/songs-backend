@@ -617,6 +617,31 @@ export default function Home() {
               }}
             />
             <button
+              onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
+              style={{
+                background: showFeaturedOnly
+                  ? 'linear-gradient(135deg, #8b0000 0%, #a52a2a 100%)'
+                  : 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)',
+                color: showFeaturedOnly ? 'white' : '#8b0000',
+                border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
+                padding: '12px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {showFeaturedOnly ? '⭐ featured' : '☆ featured'}
+            </button>
+            <button
               onClick={clearAllFilters}
               style={{
                 background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
@@ -640,31 +665,6 @@ export default function Home() {
               }}
             >
               清除搜索
-            </button>
-            <button
-              onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-              style={{
-                background: showFeaturedOnly
-                  ? 'linear-gradient(135deg, #8b0000 0%, #a52a2a 100%)'
-                  : 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)',
-                color: showFeaturedOnly ? 'white' : '#8b0000',
-                border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
-                padding: '12px 24px',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {showFeaturedOnly ? '⭐ 主打歌' : '☆ 主打歌'}
             </button>
           </div>
           <div style={{
@@ -941,7 +941,7 @@ export default function Home() {
                     accentColor: '#8b0000'
                   }}
                 />
-                <span>⭐ 主打歌</span>
+                <span>⭐ featured</span>
               </label>
             </div>
 
@@ -1056,25 +1056,30 @@ export default function Home() {
                     }
                   }}
                 >
-                  {/* 主打歌标识 */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: song.featured ? '#8b0000' : '#ffb6c1',
-                    border: '2px solid ' + (song.featured ? '#8b0000' : '#ffc0cb'),
-                    boxShadow: song.featured ? '0 0 8px rgba(139, 0, 0, 0.4)' : 'none'
-                  }} title={song.featured ? '主打歌' : '非主打歌'} />
+                  {/* 主打歌标识 - 仅主打歌显示 */}
+                  {song.featured && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '12px',
+                      padding: '4px 10px',
+                      backgroundColor: '#8b0000',
+                      color: 'white',
+                      borderRadius: '10px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      letterSpacing: '0.5px'
+                    }}>
+                      featured
+                    </div>
+                  )}
 
                   <div style={{
                     fontWeight: 'bold',
                     fontSize: '19px',
                     marginBottom: '10px',
                     color: '#333',
-                    paddingRight: '20px'
+                    paddingRight: song.featured ? '70px' : '0'
                   }}>
                     {song.name}
                   </div>
@@ -1411,7 +1416,7 @@ export default function Home() {
                           accentColor: '#8b0000'
                         }}
                       />
-                      <span>⭐ 主打歌</span>
+                      <span>⭐ featured</span>
                     </label>
                   </div>
 
@@ -1449,32 +1454,6 @@ export default function Home() {
 
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <button
-                      type="button"
-                      onClick={cancelEdit}
-                      style={{
-                        flex: 1,
-                        background: '#fff5f8',
-                        color: '#ff6b9d',
-                        border: '2px solid #ffd6e7',
-                        padding: '14px 24px',
-                        borderRadius: '20px',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#ffe8f0';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#fff5f8';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      取消
-                    </button>
-                    <button
                       type="submit"
                       disabled={loading}
                       style={{
@@ -1503,6 +1482,32 @@ export default function Home() {
                     >
                       {loading ? '保存中... 💾' : '保存 '}
                     </button>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      style={{
+                        flex: 1,
+                        background: '#fff5f8',
+                        color: '#ff6b9d',
+                        border: '2px solid #ffd6e7',
+                        padding: '14px 24px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#ffe8f0';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#fff5f8';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      取消
+                    </button>
                   </div>
                 </form>
               ) : (
@@ -1526,15 +1531,15 @@ export default function Home() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      padding: '6px 12px',
-                      backgroundColor: selectedSong.featured ? '#8b0000' : '#ffb6c1',
-                      color: 'white',
+                      padding: selectedSong.featured ? '6px 12px' : '6px 10px',
+                      backgroundColor: selectedSong.featured ? '#8b0000' : '#f0d0d0',
+                      color: selectedSong.featured ? 'white' : '#b87070',
                       borderRadius: '12px',
                       fontSize: '13px',
                       fontWeight: 'bold'
                     }}>
                       <span>{selectedSong.featured ? '⭐' : '☆'}</span>
-                      <span>{selectedSong.featured ? '主打歌' : '非主打'}</span>
+                      {selectedSong.featured && <span>featured</span>}
                     </div>
                   </div>
 
@@ -1684,17 +1689,21 @@ export default function Home() {
                       <button
                         onClick={() => removeSong(selectedSong.id)}
                         style={{
-                          flex: 1,
+                          width: '48px',
+                          height: '48px',
                           background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
                           color: 'white',
                           border: 'none',
-                          padding: '14px 24px',
-                          borderRadius: '20px',
+                          borderRadius: '12px',
                           cursor: 'pointer',
-                          fontSize: '16px',
+                          fontSize: '18px',
                           fontWeight: 'bold',
                           boxShadow: '0 4px 16px rgba(244, 67, 54, 0.35)',
-                          transition: 'all 0.3s ease'
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-2px)';
@@ -1704,8 +1713,9 @@ export default function Home() {
                           e.currentTarget.style.transform = 'translateY(0)';
                           e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 67, 54, 0.35)';
                         }}
+                        title="删除"
                       >
-                        删除 🗑️
+                        🗑️
                       </button>
                     </div>
                   ) : (
