@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: typeof key === 'number' ? key : 0,
       notes: notes?.trim() || undefined,
+      featured: body.featured === true,
       createdAt: new Date().toISOString()
     };
 

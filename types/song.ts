@@ -5,6 +5,7 @@ export interface Song {
   tags: string[];
   key: number;
   notes?: string;
+  featured?: boolean;
   createdAt: string;
 }
 
@@ -14,4 +15,5 @@ export interface CreateSongRequest {
   tags: string[];
   key: number;
   notes?: string;
+  featured?: boolean;
 }
