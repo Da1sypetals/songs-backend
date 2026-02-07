@@ -40,11 +40,15 @@ export default function Home() {
   const [tagsInput, setTagsInput] = useState('');
   const [key, setKey] = useState(0);
   const [notes, setNotes] = useState('');
+  const [featured, setFeatured] = useState(false);
 
   // 搜索框状态
   const [searchName, setSearchName] = useState('');
   const [searchSinger, setSearchSinger] = useState('');
   const [searchTag, setSearchTag] = useState('');
+
+  // 主打歌筛选状态
+  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +59,7 @@ export default function Home() {
   const [editTagsInput, setEditTagsInput] = useState('');
   const [editKey, setEditKey] = useState(0);
   const [editNotes, setEditNotes] = useState('');
+  const [editFeatured, setEditFeatured] = useState(false);
 
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -126,6 +131,11 @@ export default function Home() {
   // 过滤并排序歌曲
   const filteredSongs = useMemo(() => {
     const filtered = songs.filter(song => {
+      // 主打歌筛选
+      if (showFeaturedOnly && !song.featured) {
+        return false;
+      }
+
       // 歌名搜索
       if (searchName.trim()) {
         const searchLower = searchName.trim().toLowerCase();
@@ -157,13 +167,14 @@ export default function Home() {
 
     // 应用排序
     return sortSongs(filtered);
-  }, [songs, searchName, searchSinger, searchTag]);
+  }, [songs, searchName, searchSinger, searchTag, showFeaturedOnly]);
 
   // 清除所有搜索
   const clearAllFilters = () => {
     setSearchName('');
     setSearchSinger('');
     setSearchTag('');
+    setShowFeaturedOnly(false);
   };
 
   const addSong = async (e: React.FormEvent) => {
@@ -183,7 +194,8 @@ export default function Home() {
         singers,
         tags,
         key,
-        notes: notes.trim() || undefined
+        notes: notes.trim() || undefined,
+        featured
       };
 
       const response = await fetch('/api/songs', {
@@ -199,6 +211,7 @@ export default function Home() {
         setTagsInput('');
         setKey(0);
         setNotes('');
+        setFeatured(false);
         setShowForm(false);
         fetchSongs(true);
       } else {
@@ -248,6 +261,7 @@ export default function Home() {
     setEditTagsInput(selectedSong.tags.join(', '));
     setEditKey(selectedSong.key);
     setEditNotes(selectedSong.notes || '');
+    setEditFeatured(selectedSong.featured || false);
     setIsEditing(true);
   };
 
@@ -278,7 +292,8 @@ export default function Home() {
           singers,
           tags,
           key: editKey,
-          notes: editNotes.trim() || undefined
+          notes: editNotes.trim() || undefined,
+          featured: editFeatured
         })
       });
 
@@ -626,6 +641,31 @@ export default function Home() {
             >
               清除搜索
             </button>
+            <button
+              onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
+              style={{
+                background: showFeaturedOnly
+                  ? 'linear-gradient(135deg, #8b0000 0%, #a52a2a 100%)'
+                  : 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)',
+                color: showFeaturedOnly ? 'white' : '#8b0000',
+                border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
+                padding: '12px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {showFeaturedOnly ? '⭐ 主打歌' : '☆ 主打歌'}
+            </button>
           </div>
           <div style={{
             color: '#ff8fab',
@@ -876,6 +916,35 @@ export default function Home() {
               </div>
             </div>
 
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontWeight: 'bold',
+                color: '#8b0000',
+                cursor: 'pointer',
+                padding: '12px 16px',
+                background: featured ? 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)' : '#fff5f8',
+                borderRadius: '16px',
+                border: featured ? '2px solid #8b0000' : '2px solid #ffd6e7',
+                transition: 'all 0.3s ease'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={featured}
+                  onChange={(e) => setFeatured(e.target.checked)}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    accentColor: '#8b0000'
+                  }}
+                />
+                <span>⭐ 主打歌</span>
+              </label>
+            </div>
+
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
                 📝 备注
@@ -971,7 +1040,8 @@ export default function Home() {
                       : '0 2px 8px rgba(255, 107, 157, 0.08)',
                     cursor: 'pointer',
                     border: selectedSong?.id === song.id ? '2px solid #ff6b9d' : '2px solid #ffe8f0',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    position: 'relative'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedSong?.id !== song.id) {
@@ -986,11 +1056,25 @@ export default function Home() {
                     }
                   }}
                 >
+                  {/* 主打歌标识 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: song.featured ? '#8b0000' : '#ffb6c1',
+                    border: '2px solid ' + (song.featured ? '#8b0000' : '#ffc0cb'),
+                    boxShadow: song.featured ? '0 0 8px rgba(139, 0, 0, 0.4)' : 'none'
+                  }} title={song.featured ? '主打歌' : '非主打歌'} />
+
                   <div style={{
                     fontWeight: 'bold',
                     fontSize: '19px',
                     marginBottom: '10px',
-                    color: '#333'
+                    color: '#333',
+                    paddingRight: '20px'
                   }}>
                     {song.name}
                   </div>
@@ -1302,6 +1386,35 @@ export default function Home() {
                     </div>
                   </div>
 
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      fontWeight: 'bold',
+                      color: '#8b0000',
+                      cursor: 'pointer',
+                      padding: '12px 16px',
+                      background: editFeatured ? 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)' : '#fff5f8',
+                      borderRadius: '16px',
+                      border: editFeatured ? '2px solid #8b0000' : '2px solid #ffd6e7',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={editFeatured}
+                        onChange={(e) => setEditFeatured(e.target.checked)}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                          accentColor: '#8b0000'
+                        }}
+                      />
+                      <span>⭐ 主打歌</span>
+                    </label>
+                  </div>
+
                   <div style={{ marginBottom: '24px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
                       📝 备注
@@ -1401,12 +1514,29 @@ export default function Home() {
                   boxShadow: '0 4px 20px rgba(255, 107, 157, 0.15)',
                   border: '2px solid #ffd6e7'
                 }}>
-                  <h2 style={{
-                    fontSize: '26px',
-                    marginBottom: '20px',
-                    color: '#ff6b9d',
-                    fontWeight: 'bold'
-                  }}>{selectedSong.name}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                    <h2 style={{
+                      fontSize: '26px',
+                      color: '#ff6b9d',
+                      fontWeight: 'bold',
+                      margin: 0
+                    }}>{selectedSong.name}</h2>
+                    {/* 主打歌标识 */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 12px',
+                      backgroundColor: selectedSong.featured ? '#8b0000' : '#ffb6c1',
+                      color: 'white',
+                      borderRadius: '12px',
+                      fontSize: '13px',
+                      fontWeight: 'bold'
+                    }}>
+                      <span>{selectedSong.featured ? '⭐' : '☆'}</span>
+                      <span>{selectedSong.featured ? '主打歌' : '非主打'}</span>
+                    </div>
+                  </div>
 
                   <div style={{ marginBottom: '20px' }}>
                     <label style={{
