@@ -1,36 +1,24 @@
 import { Redis } from '@upstash/redis';
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { Song, CreateSongRequest } from '@/types/song';
+import { Song, SongMap } from '@/types/song';
 
 const redis = Redis.fromEnv();
+const SONGLIST_KEY = 'songlist';
 
-// 获取所有歌曲 - 使用 Pipeline 优化
+async function getSongMap(): Promise<SongMap> {
+  return (await redis.get<SongMap>(SONGLIST_KEY)) ?? {};
+}
+
+async function setSongMap(songMap: SongMap): Promise<void> {
+  await redis.set(SONGLIST_KEY, songMap);
+}
+
+// 获取所有歌曲
 export async function GET() {
   try {
-    const keys = await redis.keys('song:*');
-
-    if (keys.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: []
-      });
-    }
-
-    // 使用 pipeline 批量获取所有歌曲
-    const pipeline = redis.pipeline();
-    for (const key of keys) {
-      pipeline.get(key);
-    }
-
-    const results = await pipeline.exec();
-    const songs: Song[] = [];
-
-    for (const result of results) {
-      if (result) {
-        songs.push(result as Song);
-      }
-    }
+    const songMap = await getSongMap();
+    const songs: Song[] = Object.values(songMap);
 
     // 按创建时间排序
     songs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -79,7 +67,9 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    await redis.set(`song:${id}`, song);
+    const songMap = await getSongMap();
+    songMap[id] = song;
+    await setSongMap(songMap);
 
     return NextResponse.json({
       success: true,

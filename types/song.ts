@@ -17,3 +17,5 @@ export interface CreateSongRequest {
   notes?: string;
   featured?: boolean;
 }
+
+export type SongMap = Record<string, Song>;

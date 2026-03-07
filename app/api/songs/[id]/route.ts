@@ -1,8 +1,17 @@
 import { Redis } from '@upstash/redis';
 import { NextRequest, NextResponse } from 'next/server';
-import { Song } from '@/types/song';
+import { Song, SongMap } from '@/types/song';
 
 const redis = Redis.fromEnv();
+const SONGLIST_KEY = 'songlist';
+
+async function getSongMap(): Promise<SongMap> {
+  return (await redis.get<SongMap>(SONGLIST_KEY)) ?? {};
+}
+
+async function setSongMap(songMap: SongMap): Promise<void> {
+  await redis.set(SONGLIST_KEY, songMap);
+}
 
 // 获取单首歌曲
 export async function GET(
@@ -10,7 +19,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const song = await redis.get<Song>(`song:${params.id}`);
+    const songMap = await getSongMap();
+    const song = songMap[params.id];
 
     if (!song) {
       return NextResponse.json({
@@ -40,8 +50,8 @@ export async function PUT(
     const body = await request.json();
     const { name, singers, tags, key, notes } = body;
 
-    // 检查歌曲是否存在
-    const existingSong = await redis.get<Song>(`song:${params.id}`);
+    const songMap = await getSongMap();
+    const existingSong = songMap[params.id];
 
     if (!existingSong) {
       return NextResponse.json({
@@ -77,7 +87,8 @@ export async function PUT(
       createdAt: existingSong.createdAt
     };
 
-    await redis.set(`song:${params.id}`, updatedSong);
+    songMap[params.id] = updatedSong;
+    await setSongMap(songMap);
 
     return NextResponse.json({
       success: true,
@@ -97,14 +108,17 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const result = await redis.del(`song:${params.id}`);
+    const songMap = await getSongMap();
 
-    if (result === 0) {
+    if (!songMap[params.id]) {
       return NextResponse.json({
         success: false,
         error: '歌曲不存在'
       }, { status: 404 });
     }
+
+    delete songMap[params.id];
+    await setSongMap(songMap);
 
     return NextResponse.json({
       success: true,
