@@ -23,8 +23,10 @@ function sortSongs(songs: Song[]): Song[] {
     const nameCompare = a.name.localeCompare(b.name, 'zh-CN');
     if (nameCompare !== 0) return nameCompare;
 
-    // 3. 按key绝对值排序（从小到大）
-    return Math.abs(a.key) - Math.abs(b.key);
+    // 3. 按key绝对值排序（从小到大），未定调(null)排最后
+    const keyA = a.key === null ? 999 : Math.abs(a.key);
+    const keyB = b.key === null ? 999 : Math.abs(b.key);
+    return keyA - keyB;
   });
 }
 
@@ -38,7 +40,7 @@ export default function Home() {
   const [name, setName] = useState('');
   const [singersInput, setSingersInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
-  const [key, setKey] = useState(0);
+  const [key, setKey] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [featured, setFeatured] = useState(false);
 
@@ -57,7 +59,7 @@ export default function Home() {
   const [editName, setEditName] = useState('');
   const [editSingersInput, setEditSingersInput] = useState('');
   const [editTagsInput, setEditTagsInput] = useState('');
-  const [editKey, setEditKey] = useState(0);
+  const [editKey, setEditKey] = useState<number | null>(null);
   const [editNotes, setEditNotes] = useState('');
   const [editFeatured, setEditFeatured] = useState(false);
 
@@ -313,7 +315,8 @@ export default function Home() {
     }
   };
 
-  const formatKey = (key: number) => {
+  const formatKey = (key: number | null) => {
+    if (key === null) return '未定调';
     if (key > 0) return `+${key}`;
     if (key < 0) return `${key}`;
     return '原调';
@@ -842,76 +845,119 @@ export default function Home() {
               }}>
                 🎹 升降调
               </label>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                padding: '12px 16px',
-                background: '#fff5f8',
-                borderRadius: '16px',
-                border: '2px solid #ffd6e7',
-                width: 'fit-content'
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  onClick={() => key === null && setKey(0)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    background: '#fff5f8',
+                    borderRadius: '16px',
+                    border: '2px solid #ffd6e7',
+                    width: 'fit-content',
+                    cursor: key === null ? 'pointer' : 'default',
+                    opacity: key === null ? 0.5 : 1,
+                    transition: 'opacity 0.2s ease'
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k - 1); }}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      border: '2px solid #ff6b9d',
+                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                      color: '#ff6b9d',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (key !== null) {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (key !== null) {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }
+                    }}
+                  >
+                    −
+                  </button>
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    minWidth: '55px',
+                    textAlign: 'center',
+                    color: '#ff6b9d'
+                  }}>
+                    {formatKey(key)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k + 1); }}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      border: '2px solid #ff6b9d',
+                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                      color: '#ff6b9d',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (key !== null) {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (key !== null) {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setKey(k => k - 1)}
+                  onClick={() => setKey(null)}
                   style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '2px solid #ff6b9d',
-                    background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                    color: '#ff6b9d',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    border: key === null ? '2px solid #9e9e9e' : '2px solid #e0e0e0',
+                    background: key === null ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' : '#fff',
+                    color: key === null ? '#757575' : '#bdbdbd',
                     cursor: 'pointer',
-                    fontSize: '22px',
+                    fontSize: '14px',
                     fontWeight: 'bold',
                     transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
+                    if (key !== null) {
+                      e.currentTarget.style.background = '#f5f5f5';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                    e.currentTarget.style.transform = 'scale(1)';
+                    if (key !== null) {
+                      e.currentTarget.style.background = '#fff';
+                    }
                   }}
                 >
-                  −
-                </button>
-                <span style={{
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  minWidth: '60px',
-                  textAlign: 'center',
-                  color: '#ff6b9d'
-                }}>
-                  {formatKey(key)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setKey(k => k + 1)}
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '2px solid #ff6b9d',
-                    background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                    color: '#ff6b9d',
-                    cursor: 'pointer',
-                    fontSize: '22px',
-                    fontWeight: 'bold',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  +
+                  未定调
                 </button>
               </div>
             </div>
@@ -1103,13 +1149,15 @@ export default function Home() {
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <span style={{
-                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f4f8 100%)',
-                      color: '#6bb3c7',
+                      background: song.key === null
+                        ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)'
+                        : 'linear-gradient(135deg, #f0f9ff 0%, #e0f4f8 100%)',
+                      color: song.key === null ? '#9e9e9e' : '#6bb3c7',
                       padding: '6px 14px',
                       borderRadius: '14px',
                       fontSize: '13px',
                       fontWeight: 'bold',
-                      border: '2px solid #6bb3c7'
+                      border: song.key === null ? '2px solid #9e9e9e' : '2px solid #6bb3c7'
                     }}>
                       🎹 {formatKey(song.key)}
                     </span>
@@ -1317,76 +1365,119 @@ export default function Home() {
                     }}>
                       🎹 升降调
                     </label>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '12px 16px',
-                      background: '#fff5f8',
-                      borderRadius: '16px',
-                      border: '2px solid #ffd6e7',
-                      width: 'fit-content'
-                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div
+                        onClick={() => editKey === null && setEditKey(0)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          background: '#fff5f8',
+                          borderRadius: '16px',
+                          border: '2px solid #ffd6e7',
+                          width: 'fit-content',
+                          cursor: editKey === null ? 'pointer' : 'default',
+                          opacity: editKey === null ? 0.5 : 1,
+                          transition: 'opacity 0.2s ease'
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setEditKey(k => k === null ? 0 : k - 1); }}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            border: '2px solid #ff6b9d',
+                            background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                            color: '#ff6b9d',
+                            cursor: 'pointer',
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (editKey !== null) {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (editKey !== null) {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }
+                          }}
+                        >
+                          −
+                        </button>
+                        <span style={{
+                          fontSize: '18px',
+                          fontWeight: 'bold',
+                          minWidth: '55px',
+                          textAlign: 'center',
+                          color: '#ff6b9d'
+                        }}>
+                          {formatKey(editKey)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setEditKey(k => k === null ? 0 : k + 1); }}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            border: '2px solid #ff6b9d',
+                            background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                            color: '#ff6b9d',
+                            cursor: 'pointer',
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (editKey !== null) {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (editKey !== null) {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => setEditKey(k => k - 1)}
+                        onClick={() => setEditKey(null)}
                         style={{
-                          width: '44px',
-                          height: '44px',
-                          borderRadius: '50%',
-                          border: '2px solid #ff6b9d',
-                          background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                          color: '#ff6b9d',
+                          padding: '10px 16px',
+                          borderRadius: '12px',
+                          border: editKey === null ? '2px solid #9e9e9e' : '2px solid #e0e0e0',
+                          background: editKey === null ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' : '#fff',
+                          color: editKey === null ? '#757575' : '#bdbdbd',
                           cursor: 'pointer',
-                          fontSize: '22px',
+                          fontSize: '14px',
                           fontWeight: 'bold',
                           transition: 'all 0.2s ease'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                          e.currentTarget.style.transform = 'scale(1.05)';
+                          if (editKey !== null) {
+                            e.currentTarget.style.background = '#f5f5f5';
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                          e.currentTarget.style.transform = 'scale(1)';
+                          if (editKey !== null) {
+                            e.currentTarget.style.background = '#fff';
+                          }
                         }}
                       >
-                        −
-                      </button>
-                      <span style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        minWidth: '60px',
-                        textAlign: 'center',
-                        color: '#ff6b9d'
-                      }}>
-                        {formatKey(editKey)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setEditKey(k => k + 1)}
-                        style={{
-                          width: '44px',
-                          height: '44px',
-                          borderRadius: '50%',
-                          border: '2px solid #ff6b9d',
-                          background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                          color: '#ff6b9d',
-                          cursor: 'pointer',
-                          fontSize: '22px',
-                          fontWeight: 'bold',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      >
-                        +
+                        未定调
                       </button>
                     </div>
                   </div>
@@ -1583,11 +1674,11 @@ export default function Home() {
                       fontSize: '20px',
                       marginTop: '12px',
                       fontWeight: 'bold',
-                      color: '#6bb3c7',
-                      background: '#f0f9ff',
+                      color: selectedSong.key === null ? '#9e9e9e' : '#6bb3c7',
+                      background: selectedSong.key === null ? '#f5f5f5' : '#f0f9ff',
                       padding: '10px 16px',
                       borderRadius: '16px',
-                      border: '2px solid #6bb3c7',
+                      border: selectedSong.key === null ? '2px solid #9e9e9e' : '2px solid #6bb3c7',
                       display: 'inline-block'
                     }}>
                       {formatKey(selectedSong.key)}
