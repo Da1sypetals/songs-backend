@@ -342,12 +342,12 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #fff0f5 0%, #ffe4ed 50%, #fff5f8 100%)'
+      background: '#fff5f8'
     }}>
       <main style={{
-        maxWidth: '1200px',
+        maxWidth: '1400px',
         margin: '0 auto',
-        padding: '24px',
+        padding: '16px',
         minHeight: '100vh'
       }}>
         {/* 登录弹窗 */}
@@ -365,7 +365,7 @@ export default function Home() {
             zIndex: 1000
           }}>
             <div style={{
-              background: 'linear-gradient(145deg, #fff5f8 0%, #ffe8f0 100%)',
+              background: '#fff5f8',
               padding: '36px',
               borderRadius: '24px',
               width: '90%',
@@ -449,7 +449,7 @@ export default function Home() {
                     padding: '12px',
                     borderRadius: '20px',
                     border: 'none',
-                    background: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                    background: '#ff6b9d',
                     color: 'white',
                     cursor: 'pointer',
                     fontSize: '14px',
@@ -478,11 +478,11 @@ export default function Home() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '28px',
-          padding: '20px 28px',
-          background: 'linear-gradient(135deg, #ffffff 0%, #fff5f8 100%)',
-          borderRadius: '20px',
-          boxShadow: '0 4px 20px rgba(255, 107, 157, 0.1)',
+          marginBottom: '16px',
+          padding: '16px 20px',
+          background: '#ffffff',
+          borderRadius: '16px',
+          boxShadow: '0 2px 12px rgba(255, 107, 157, 0.08)',
           border: '2px solid #ffd6e7'
         }}>
           <h1 style={{
@@ -535,7 +535,7 @@ export default function Home() {
                   padding: '10px 24px',
                   borderRadius: '20px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                  background: '#ff6b9d',
                   color: 'white',
                   cursor: 'pointer',
                   fontSize: '14px',
@@ -560,19 +560,19 @@ export default function Home() {
 
         {/* 搜索区域 */}
         <div style={{
-          background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
-          padding: '24px',
-          borderRadius: '20px',
-          marginBottom: '24px',
-          boxShadow: '0 4px 16px rgba(255, 107, 157, 0.08)',
+          background: '#ffffff',
+          padding: '16px',
+          borderRadius: '16px',
+          marginBottom: '16px',
+          boxShadow: '0 2px 12px rgba(255, 107, 157, 0.08)',
           border: '2px solid #ffd6e7'
         }}>
           <div style={{
             display: 'flex',
-            gap: '12px',
+            gap: '8px',
             flexWrap: 'wrap',
             alignItems: 'center',
-            marginBottom: '16px'
+            marginBottom: '12px'
           }}>
             <input
               type="text"
@@ -623,12 +623,12 @@ export default function Home() {
               onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
               style={{
                 background: showFeaturedOnly
-                  ? 'linear-gradient(135deg, #8b0000 0%, #a52a2a 100%)'
-                  : 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)',
+                  ? '#8b0000'
+                  : '#ffe4e1',
                 color: showFeaturedOnly ? 'white' : '#8b0000',
                 border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
-                padding: '12px 24px',
-                borderRadius: '20px',
+                padding: '10px 20px',
+                borderRadius: '16px',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: 'bold',
@@ -647,11 +647,11 @@ export default function Home() {
             <button
               onClick={clearAllFilters}
               style={{
-                background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                background: '#fff5f8',
                 color: '#ff6b9d',
                 border: '2px solid #ffd6e7',
-                padding: '12px 24px',
-                borderRadius: '20px',
+                padding: '10px 20px',
+                borderRadius: '16px',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: 'bold',
@@ -663,7 +663,7 @@ export default function Home() {
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                e.currentTarget.style.background = '#fff5f8';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -672,11 +672,11 @@ export default function Home() {
           </div>
           <div style={{
             color: '#ff8fab',
-            fontSize: '15px',
+            fontSize: '14px',
             fontWeight: '500',
-            padding: '10px 16px',
+            padding: '8px 12px',
             background: '#fff5f8',
-            borderRadius: '12px',
+            borderRadius: '10px',
             display: 'inline-block'
           }}>
             🎵 共 <strong style={{ color: '#ff6b9d' }}>{songs.length}</strong> 首歌 / 展示 <strong style={{ color: '#ff6b9d' }}>{filteredSongs.length}</strong> 首歌
@@ -714,360 +714,378 @@ export default function Home() {
           </button>
         )}
 
-        {showForm && (
-          <form
-            onSubmit={addSong}
-            style={{
-              background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
-              padding: '28px',
-              borderRadius: '24px',
-              marginBottom: '24px',
-              boxShadow: '0 4px 20px rgba(255, 107, 157, 0.12)',
-              border: '2px solid #ffd6e7'
-            }}
-          >
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '10px',
-                fontWeight: 'bold',
-                color: '#ff6b9d'
-              }}>
-                🎵 歌曲名称 *
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+          {/* 左侧：歌曲列表 + 新增表单 */}
+          <div style={{ width: '64%' }}>
+            {/* 新增表单（在showForm时显示在列表上方） */}
+            {isAdmin && showForm && (
+              <form
+                onSubmit={addSong}
                 style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  borderRadius: '16px',
+                  background: '#ffffff',
+                  padding: '20px',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 16px rgba(255, 107, 157, 0.1)',
                   border: '2px solid #ffd6e7',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
-                  background: '#fff8fb',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
+                  marginBottom: '16px'
                 }}
-                placeholder="输入歌曲名称"
-                required
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#ff6b9d';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#ffd6e7';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
+              >
+                <h2 style={{
+                  fontSize: '20px',
+                  marginBottom: '20px',
+                  color: '#ff6b9d',
+                  fontWeight: 'bold'
+                }}>新增歌曲</h2>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '10px',
-                fontWeight: 'bold',
-                color: '#ff6b9d'
-              }}>
-                🎤 参考歌手 *（多个用逗号分隔，中英文逗号均可）
-              </label>
-              <input
-                type="text"
-                value={singersInput}
-                onChange={(e) => setSingersInput(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  borderRadius: '16px',
-                  border: '2px solid #ffd6e7',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
-                  background: '#fff8fb',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                placeholder="如：小时姑娘，winky诗"
-                required
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#ff6b9d';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#ffd6e7';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '10px',
-                fontWeight: 'bold',
-                color: '#ff6b9d'
-              }}>
-                🏷️ 标签（多个用逗号分隔，中英文逗号均可）
-              </label>
-              <input
-                type="text"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  borderRadius: '16px',
-                  border: '2px solid #ffd6e7',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
-                  background: '#fff8fb',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                placeholder="如：古风，对唱，三拍子，原耽"
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#ff6b9d';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#ffd6e7';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '16px',
-                fontWeight: 'bold',
-                color: '#ff6b9d'
-              }}>
-                🎹 升降调
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div
-                  onClick={() => key === null && setKey(0)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px 16px',
-                    background: '#fff5f8',
-                    borderRadius: '16px',
-                    border: '2px solid #ffd6e7',
-                    width: 'fit-content',
-                    cursor: key === null ? 'pointer' : 'default',
-                    opacity: key === null ? 0.5 : 1,
-                    transition: 'opacity 0.2s ease'
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k - 1); }}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      border: '2px solid #ff6b9d',
-                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                      color: '#ff6b9d',
-                      cursor: 'pointer',
-                      fontSize: '20px',
+                {/* 第一行：song name | ref singer */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '6px',
                       fontWeight: 'bold',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (key !== null) {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (key !== null) {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }
-                    }}
-                  >
-                    −
-                  </button>
-                  <span style={{
-                    fontSize: '18px',
+                      color: '#ff6b9d',
+                      fontSize: '13px'
+                    }}>
+                      🎵 歌曲名称 *
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        border: '2px solid #ffd6e7',
+                        fontSize: '14px',
+                        boxSizing: 'border-box',
+                        background: '#fff8fb',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      placeholder="输入歌曲名称"
+                      required
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffd6e7';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '6px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d',
+                      fontSize: '13px'
+                    }}>
+                      🎤 参考歌手 *
+                    </label>
+                    <input
+                      type="text"
+                      value={singersInput}
+                      onChange={(e) => setSingersInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        border: '2px solid #ffd6e7',
+                        fontSize: '14px',
+                        boxSizing: 'border-box',
+                        background: '#fff8fb',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      placeholder="多个用逗号分隔"
+                      required
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffd6e7';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '10px',
                     fontWeight: 'bold',
-                    minWidth: '55px',
-                    textAlign: 'center',
                     color: '#ff6b9d'
                   }}>
-                    {formatKey(key)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k + 1); }}
+                    🏷️ 标签（多个用逗号分隔，中英文逗号均可）
+                  </label>
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
                     style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      border: '2px solid #ff6b9d',
-                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                      color: '#ff6b9d',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      fontWeight: 'bold',
-                      transition: 'all 0.2s ease'
+                      width: '100%',
+                      padding: '14px 18px',
+                      borderRadius: '16px',
+                      border: '2px solid #ffd6e7',
+                      fontSize: '16px',
+                      boxSizing: 'border-box',
+                      background: '#fff8fb',
+                      outline: 'none',
+                      transition: 'all 0.3s ease'
                     }}
-                    onMouseEnter={(e) => {
-                      if (key !== null) {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                      }
+                    placeholder="如：古风，对唱，三拍子，原耽"
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#ff6b9d';
+                      e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
                     }}
-                    onMouseLeave={(e) => {
-                      if (key !== null) {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#ffd6e7';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
-                  >
-                    +
-                  </button>
+                  />
                 </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '10px',
+                    fontWeight: 'bold',
+                    color: '#ff6b9d'
+                  }}>
+                    🎹 升降调
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      onClick={() => key === null && setKey(0)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px 16px',
+                        background: '#fff5f8',
+                        borderRadius: '16px',
+                        border: '2px solid #ffd6e7',
+                        width: 'fit-content',
+                        cursor: key === null ? 'pointer' : 'default',
+                        opacity: key === null ? 0.5 : 1,
+                        transition: 'opacity 0.2s ease'
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k - 1); }}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          border: '2px solid #ff6b9d',
+                          background: '#fff5f8',
+                          color: '#ff6b9d',
+                          cursor: 'pointer',
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (key !== null) {
+                            e.currentTarget.style.background = '#ffe8f0';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (key !== null) {
+                            e.currentTarget.style.background = '#fff5f8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }
+                        }}
+                      >
+                        −
+                      </button>
+                      <span style={{
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        minWidth: '55px',
+                        textAlign: 'center',
+                        color: '#ff6b9d'
+                      }}>
+                        {formatKey(key)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setKey(k => k === null ? 0 : k + 1); }}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          border: '2px solid #ff6b9d',
+                          background: '#fff5f8',
+                          color: '#ff6b9d',
+                          cursor: 'pointer',
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (key !== null) {
+                            e.currentTarget.style.background = '#ffe8f0';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (key !== null) {
+                            e.currentTarget.style.background = '#fff5f8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setKey(null)}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: '12px',
+                        border: key === null ? '2px solid #9e9e9e' : '2px solid #e0e0e0',
+                        background: key === null ? '#f5f5f5' : '#fff',
+                        color: key === null ? '#757575' : '#bdbdbd',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (key !== null) {
+                          e.currentTarget.style.background = '#f5f5f5';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (key !== null) {
+                          e.currentTarget.style.background = '#fff';
+                        }
+                      }}
+                    >
+                      未定调
+                    </button>
+                  </div>
+                </div>
+
+                {/* 第三行：notes（最大化） | featured（紧凑） */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'flex-end' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '6px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d',
+                      fontSize: '13px'
+                    }}>
+                      📝 备注
+                    </label>
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        border: '2px solid #ffcce0',
+                        fontSize: '14px',
+                        boxSizing: 'border-box',
+                        background: '#fff5f8',
+                        outline: 'none',
+                        transition: 'all 0.3s ease'
+                      }}
+                      placeholder="可以写点什么... (可选)"
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#ff6b9d';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 157, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ffcce0';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 'none' }}>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontWeight: 'bold',
+                      color: '#8b0000',
+                      cursor: 'pointer',
+                      padding: '10px 12px',
+                      background: featured ? '#ffe4e1' : '#fff5f8',
+                      borderRadius: '10px',
+                      border: featured ? '2px solid #8b0000' : '2px solid #ffd6e7',
+                      transition: 'all 0.3s ease',
+                      fontSize: '13px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={featured}
+                        onChange={(e) => setFeatured(e.target.checked)}
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          cursor: 'pointer',
+                          accentColor: '#8b0000'
+                        }}
+                      />
+                      <span>⭐ featured</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 第四行：save 按钮 */}
                 <button
-                  type="button"
-                  onClick={() => setKey(null)}
+                  type="submit"
+                  disabled={loading}
                   style={{
-                    padding: '10px 16px',
-                    borderRadius: '12px',
-                    border: key === null ? '2px solid #9e9e9e' : '2px solid #e0e0e0',
-                    background: key === null ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' : '#fff',
-                    color: key === null ? '#757575' : '#bdbdbd',
-                    cursor: 'pointer',
+                    background: loading ? '#ffd6e7' : '#ff6b9d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 24px',
+                    borderRadius: '10px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    transition: 'all 0.2s ease'
+                    boxShadow: loading ? 'none' : '0 4px 12px rgba(255, 107, 157, 0.3)',
+                    transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={(e) => {
-                    if (key !== null) {
-                      e.currentTarget.style.background = '#f5f5f5';
+                    if (!loading) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 157, 0.4)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (key !== null) {
-                      e.currentTarget.style.background = '#fff';
+                    if (!loading) {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 157, 0.3)';
                     }
                   }}
                 >
-                  未定调
+                  {loading ? '保存中... 💾' : '保存 '}
                 </button>
-              </div>
-            </div>
+              </form>
+            )}
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                fontWeight: 'bold',
-                color: '#8b0000',
-                cursor: 'pointer',
-                padding: '12px 16px',
-                background: featured ? 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)' : '#fff5f8',
-                borderRadius: '16px',
-                border: featured ? '2px solid #8b0000' : '2px solid #ffd6e7',
-                transition: 'all 0.3s ease'
-              }}>
-                <input
-                  type="checkbox"
-                  checked={featured}
-                  onChange={(e) => setFeatured(e.target.checked)}
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                    accentColor: '#8b0000'
-                  }}
-                />
-                <span>⭐ featured</span>
-              </label>
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
-                📝 备注
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '16px',
-                  border: '2px solid #ffcce0',
-                  fontSize: '15px',
-                  boxSizing: 'border-box',
-                  resize: 'vertical',
-                  minHeight: '80px',
-                  background: '#fff5f8',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                placeholder="可以写点什么... ✨ (可选)"
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#ff6b9d';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#ffcce0';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                background: loading ? '#ffd6e7' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
-                color: 'white',
-                border: 'none',
-                padding: '14px 36px',
-                borderRadius: '24px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                boxShadow: loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 157, 0.35)';
-                }
-              }}
-            >
-              {loading ? '保存中... 💾' : '保存 '}
-            </button>
-          </form>
-        )}
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
-          <div>
-            <h2 style={{
-              fontSize: '22px',
-              marginBottom: '18px',
-              color: '#ff6b9d',
-              fontWeight: 'bold',
-              padding: '0 8px'
+            {/* 歌曲列表 */}
+            <div style={{
+              columnCount: 3,
+              columnGap: '10px'
             }}>
-              🎶 歌曲列表 ({filteredSongs.length}/{songs.length})
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {filteredSongs.map((song) => (
                 <div
                   key={song.id}
@@ -1076,28 +1094,28 @@ export default function Home() {
                     setIsEditing(false);
                   }}
                   style={{
-                    background: selectedSong?.id === song.id
-                      ? 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)'
-                      : 'linear-gradient(135deg, #ffffff 0%, #fffafc 100%)',
-                    padding: '20px',
-                    borderRadius: '18px',
+                    background: selectedSong?.id === song.id ? '#fff5f8' : '#ffffff',
+                    padding: '12px',
+                    borderRadius: '12px',
                     boxShadow: selectedSong?.id === song.id
-                      ? '0 4px 16px rgba(255, 107, 157, 0.25)'
-                      : '0 2px 8px rgba(255, 107, 157, 0.08)',
+                      ? '0 2px 10px rgba(255, 107, 157, 0.2)'
+                      : '0 1px 4px rgba(255, 107, 157, 0.06)',
                     cursor: 'pointer',
                     border: selectedSong?.id === song.id ? '2px solid #ff6b9d' : '2px solid #ffe8f0',
                     transition: 'all 0.3s ease',
-                    position: 'relative'
+                    position: 'relative',
+                    breakInside: 'avoid',
+                    marginBottom: '10px'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedSong?.id !== song.id) {
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 157, 0.15)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 107, 157, 0.12)';
                       e.currentTarget.style.border = '2px solid #ffd6e7';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (selectedSong?.id !== song.id) {
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 107, 157, 0.08)';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(255, 107, 157, 0.06)';
                       e.currentTarget.style.border = '2px solid #ffe8f0';
                     }
                   }}
@@ -1106,15 +1124,14 @@ export default function Home() {
                   {song.featured && (
                     <div style={{
                       position: 'absolute',
-                      top: '10px',
-                      right: '12px',
-                      padding: '4px 10px',
+                      top: '8px',
+                      right: '8px',
+                      padding: '2px 6px',
                       backgroundColor: '#8b0000',
                       color: 'white',
-                      borderRadius: '10px',
-                      fontSize: '11px',
-                      fontWeight: 'bold',
-                      letterSpacing: '0.5px'
+                      borderRadius: '8px',
+                      fontSize: '10px',
+                      fontWeight: 'bold'
                     }}>
                       featured
                     </div>
@@ -1122,79 +1139,91 @@ export default function Home() {
 
                   <div style={{
                     fontWeight: 'bold',
-                    fontSize: '19px',
-                    marginBottom: '10px',
+                    fontSize: '14px',
+                    marginBottom: '6px',
                     color: '#333',
-                    paddingRight: song.featured ? '70px' : '0'
+                    paddingRight: song.featured ? '60px' : '0',
+                    lineHeight: '1.3'
                   }}>
                     {song.name}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' }}>
                     {song.singers.map((singer, i) => (
                       <span
                         key={i}
                         style={{
-                          background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+                          background: '#f5f3ff',
                           color: '#8b7bf7',
-                          padding: '6px 14px',
-                          borderRadius: '14px',
-                          fontSize: '13px',
+                          padding: '3px 8px',
+                          borderRadius: '10px',
+                          fontSize: '11px',
                           fontWeight: '600',
                           border: '1px solid #ddd6fe'
                         }}
                       >
-                        🎤 {singer}
+                        {singer}
                       </span>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     <span style={{
-                      background: song.key === null
-                        ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)'
-                        : 'linear-gradient(135deg, #f0f9ff 0%, #e0f4f8 100%)',
+                      background: song.key === null ? '#f5f5f5' : '#f0f9ff',
                       color: song.key === null ? '#9e9e9e' : '#6bb3c7',
-                      padding: '6px 14px',
-                      borderRadius: '14px',
-                      fontSize: '13px',
+                      padding: '3px 8px',
+                      borderRadius: '10px',
+                      fontSize: '11px',
                       fontWeight: 'bold',
-                      border: song.key === null ? '2px solid #9e9e9e' : '2px solid #6bb3c7'
+                      border: song.key === null ? '1px solid #9e9e9e' : '1px solid #6bb3c7'
                     }}>
-                      🎹 {formatKey(song.key)}
+                      {formatKey(song.key)}
                     </span>
-                    {song.tags.map((tag, i) => (
+                    {song.tags.slice(0, 2).map((tag, i) => (
                       <span
                         key={i}
                         style={{
-                          background: 'linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%)',
+                          background: '#e8f5e9',
                           color: '#2e7d32',
-                          padding: '6px 14px',
-                          borderRadius: '14px',
-                          fontSize: '13px',
+                          padding: '3px 8px',
+                          borderRadius: '10px',
+                          fontSize: '11px',
                           fontWeight: '500'
                         }}
                       >
-                        🏷️ {tag}
+                        {tag}
                       </span>
                     ))}
+                    {song.tags.length > 2 && (
+                      <span style={{
+                        background: '#f5f5f5',
+                        color: '#888',
+                        padding: '3px 8px',
+                        borderRadius: '10px',
+                        fontSize: '11px',
+                        fontWeight: '500'
+                      }}>
+                        +{song.tags.length - 2}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
               {isLoadingSongs ? (
                 <div style={{
                   textAlign: 'center',
-                  padding: '80px 40px',
-                  background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                  borderRadius: '20px',
-                  border: '2px dashed #ffd6e7'
+                  padding: '40px 20px',
+                  background: '#fff5f8',
+                  borderRadius: '16px',
+                  border: '2px dashed #ffd6e7',
+                  columnSpan: 'all'
                 }}>
                   <div style={{
-                    width: '50px',
-                    height: '50px',
-                    border: '4px solid #ffe8f0',
-                    borderTop: '4px solid #ff6b9d',
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid #ffe8f0',
+                    borderTop: '3px solid #ff6b9d',
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite',
-                    margin: '0 auto 20px'
+                    margin: '0 auto 16px'
                   }} />
                   <style>{`
                   @keyframes spin {
@@ -1202,19 +1231,20 @@ export default function Home() {
                     100% { transform: rotate(360deg); }
                   }
                 `}</style>
-                  <p style={{ color: '#ff8fab', fontSize: '16px' }}>正在加载歌曲...</p>
+                  <p style={{ color: '#ff8fab', fontSize: '14px' }}>正在加载歌曲...</p>
                 </div>
               ) : filteredSongs.length === 0 && (
                 <div style={{
-                  padding: '60px 40px',
-                  background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                  borderRadius: '20px',
+                  padding: '40px 20px',
+                  background: '#fff5f8',
+                  borderRadius: '16px',
                   textAlign: 'center',
-                  border: '2px dashed #ffd6e7'
+                  border: '2px dashed #ffd6e7',
+                  columnSpan: 'all'
                 }}>
                   <p style={{
                     color: '#ff6b9d',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontWeight: '500',
                     margin: 0
                   }}>
@@ -1226,8 +1256,9 @@ export default function Home() {
           </div>
 
           <div style={{
+            width: '36%',
             position: 'sticky',
-            top: '24px'
+            top: '16px'
           }}>
             {selectedSong ? (
               isEditing ? (
@@ -1235,16 +1266,16 @@ export default function Home() {
                 <form
                   onSubmit={saveEdit}
                   style={{
-                    background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
-                    padding: '28px',
-                    borderRadius: '24px',
-                    boxShadow: '0 4px 20px rgba(255, 107, 157, 0.15)',
+                    background: '#ffffff',
+                    padding: '20px',
+                    borderRadius: '20px',
+                    boxShadow: '0 2px 16px rgba(255, 107, 157, 0.12)',
                     border: '2px solid #ffd6e7'
                   }}
                 >
                   <h2 style={{
-                    fontSize: '24px',
-                    marginBottom: '24px',
+                    fontSize: '20px',
+                    marginBottom: '20px',
                     color: '#ff6b9d',
                     fontWeight: 'bold'
                   }}>编辑歌曲</h2>
@@ -1356,25 +1387,25 @@ export default function Home() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '24px' }}>
+                  <div style={{ marginBottom: '20px' }}>
                     <label style={{
                       display: 'block',
-                      marginBottom: '16px',
+                      marginBottom: '12px',
                       fontWeight: 'bold',
                       color: '#ff6b9d'
                     }}>
                       🎹 升降调
                     </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div
                         onClick={() => editKey === null && setEditKey(0)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px',
-                          padding: '12px 16px',
+                          gap: '10px',
+                          padding: '10px 14px',
                           background: '#fff5f8',
-                          borderRadius: '16px',
+                          borderRadius: '14px',
                           border: '2px solid #ffd6e7',
                           width: 'fit-content',
                           cursor: editKey === null ? 'pointer' : 'default',
@@ -1386,26 +1417,26 @@ export default function Home() {
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setEditKey(k => k === null ? 0 : k - 1); }}
                           style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '36px',
+                            height: '36px',
                             borderRadius: '50%',
                             border: '2px solid #ff6b9d',
-                            background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                            background: '#fff5f8',
                             color: '#ff6b9d',
                             cursor: 'pointer',
-                            fontSize: '20px',
+                            fontSize: '18px',
                             fontWeight: 'bold',
                             transition: 'all 0.2s ease'
                           }}
                           onMouseEnter={(e) => {
                             if (editKey !== null) {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                              e.currentTarget.style.background = '#ffe8f0';
                               e.currentTarget.style.transform = 'scale(1.05)';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (editKey !== null) {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                              e.currentTarget.style.background = '#fff5f8';
                               e.currentTarget.style.transform = 'scale(1)';
                             }
                           }}
@@ -1413,9 +1444,9 @@ export default function Home() {
                           −
                         </button>
                         <span style={{
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: 'bold',
-                          minWidth: '55px',
+                          minWidth: '50px',
                           textAlign: 'center',
                           color: '#ff6b9d'
                         }}>
@@ -1425,26 +1456,26 @@ export default function Home() {
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setEditKey(k => k === null ? 0 : k + 1); }}
                           style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '36px',
+                            height: '36px',
                             borderRadius: '50%',
                             border: '2px solid #ff6b9d',
-                            background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
+                            background: '#fff5f8',
                             color: '#ff6b9d',
                             cursor: 'pointer',
-                            fontSize: '20px',
+                            fontSize: '18px',
                             fontWeight: 'bold',
                             transition: 'all 0.2s ease'
                           }}
                           onMouseEnter={(e) => {
                             if (editKey !== null) {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #ffe8f0 0%, #ffd6e7 100%)';
+                              e.currentTarget.style.background = '#ffe8f0';
                               e.currentTarget.style.transform = 'scale(1.05)';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (editKey !== null) {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)';
+                              e.currentTarget.style.background = '#fff5f8';
                               e.currentTarget.style.transform = 'scale(1)';
                             }
                           }}
@@ -1456,13 +1487,13 @@ export default function Home() {
                         type="button"
                         onClick={() => setEditKey(null)}
                         style={{
-                          padding: '10px 16px',
-                          borderRadius: '12px',
+                          padding: '8px 14px',
+                          borderRadius: '10px',
                           border: editKey === null ? '2px solid #9e9e9e' : '2px solid #e0e0e0',
-                          background: editKey === null ? 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' : '#fff',
+                          background: editKey === null ? '#f5f5f5' : '#fff',
                           color: editKey === null ? '#757575' : '#bdbdbd',
                           cursor: 'pointer',
-                          fontSize: '14px',
+                          fontSize: '13px',
                           fontWeight: 'bold',
                           transition: 'all 0.2s ease'
                         }}
@@ -1482,17 +1513,17 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '16px' }}>
                     <label style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '10px',
+                      gap: '8px',
                       fontWeight: 'bold',
                       color: '#8b0000',
                       cursor: 'pointer',
-                      padding: '12px 16px',
-                      background: editFeatured ? 'linear-gradient(135deg, #ffe4e1 0%, #ffd5d5 100%)' : '#fff5f8',
-                      borderRadius: '16px',
+                      padding: '10px 14px',
+                      background: editFeatured ? '#ffe4e1' : '#fff5f8',
+                      borderRadius: '14px',
                       border: editFeatured ? '2px solid #8b0000' : '2px solid #ffd6e7',
                       transition: 'all 0.3s ease'
                     }}>
@@ -1501,8 +1532,8 @@ export default function Home() {
                         checked={editFeatured}
                         onChange={(e) => setEditFeatured(e.target.checked)}
                         style={{
-                          width: '20px',
-                          height: '20px',
+                          width: '18px',
+                          height: '18px',
                           cursor: 'pointer',
                           accentColor: '#8b0000'
                         }}
@@ -1511,8 +1542,8 @@ export default function Home() {
                     </label>
                   </div>
 
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#ff6b9d' }}>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', color: '#ff6b9d' }}>
                       📝 备注
                     </label>
                     <textarea
@@ -1520,13 +1551,13 @@ export default function Home() {
                       onChange={(e) => setEditNotes(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
-                        borderRadius: '16px',
+                        padding: '10px 14px',
+                        borderRadius: '14px',
                         border: '2px solid #ffcce0',
-                        fontSize: '15px',
+                        fontSize: '14px',
                         boxSizing: 'border-box',
                         resize: 'vertical',
-                        minHeight: '80px',
+                        minHeight: '60px',
                         background: '#fff5f8',
                         outline: 'none',
                         transition: 'all 0.3s ease'
@@ -1543,32 +1574,32 @@ export default function Home() {
                     />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '10px' }}>
                     <button
                       type="submit"
                       disabled={loading}
                       style={{
                         flex: 1,
-                        background: loading ? '#ffd6e7' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                        background: loading ? '#ffd6e7' : '#ff6b9d',
                         color: 'white',
                         border: 'none',
-                        padding: '14px 24px',
-                        borderRadius: '20px',
+                        padding: '12px 20px',
+                        borderRadius: '18px',
                         cursor: loading ? 'not-allowed' : 'pointer',
-                        fontSize: '16px',
+                        fontSize: '15px',
                         fontWeight: 'bold',
-                        boxShadow: loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)',
+                        boxShadow: loading ? 'none' : '0 4px 12px rgba(255, 107, 157, 0.3)',
                         transition: 'all 0.3s ease'
                       }}
                       onMouseEnter={(e) => {
                         if (!loading) {
                           e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 157, 0.4)';
                         }
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = loading ? 'none' : '0 4px 16px rgba(255, 107, 157, 0.35)';
+                        e.currentTarget.style.boxShadow = loading ? 'none' : '0 4px 12px rgba(255, 107, 157, 0.3)';
                       }}
                     >
                       {loading ? '保存中... 💾' : '保存 '}
@@ -1581,10 +1612,10 @@ export default function Home() {
                         background: '#fff5f8',
                         color: '#ff6b9d',
                         border: '2px solid #ffd6e7',
-                        padding: '14px 24px',
-                        borderRadius: '20px',
+                        padding: '12px 20px',
+                        borderRadius: '18px',
                         cursor: 'pointer',
-                        fontSize: '16px',
+                        fontSize: '15px',
                         fontWeight: 'bold',
                         transition: 'all 0.3s ease'
                       }}
@@ -1604,15 +1635,15 @@ export default function Home() {
               ) : (
                 // 查看模式
                 <div style={{
-                  background: 'linear-gradient(145deg, #ffffff 0%, #fff5f8 100%)',
-                  padding: '28px',
-                  borderRadius: '24px',
-                  boxShadow: '0 4px 20px rgba(255, 107, 157, 0.15)',
+                  background: '#ffffff',
+                  padding: '20px',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 16px rgba(255, 107, 157, 0.12)',
                   border: '2px solid #ffd6e7'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                     <h2 style={{
-                      fontSize: '26px',
+                      fontSize: '20px',
                       color: '#ff6b9d',
                       fontWeight: 'bold',
                       margin: 0
@@ -1621,12 +1652,12 @@ export default function Home() {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      padding: selectedSong.featured ? '6px 12px' : '6px 10px',
+                      gap: '4px',
+                      padding: selectedSong.featured ? '4px 10px' : '4px 8px',
                       backgroundColor: selectedSong.featured ? '#8b0000' : '#f0d0d0',
                       color: selectedSong.featured ? 'white' : '#b87070',
-                      borderRadius: '12px',
-                      fontSize: '13px',
+                      borderRadius: '10px',
+                      fontSize: '12px',
                       fontWeight: 'bold'
                     }}>
                       <span>{selectedSong.featured ? '⭐' : '☆'}</span>
@@ -1634,24 +1665,24 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '16px' }}>
                     <label style={{
                       display: 'block',
                       color: '#ff8fab',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: 'bold',
-                      marginBottom: '10px'
+                      marginBottom: '8px'
                     }}>🎤 参考歌手</label>
-                    <div style={{ marginTop: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {selectedSong.singers.map((singer, i) => (
                         <span
                           key={i}
                           style={{
-                            background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+                            background: '#f5f3ff',
                             color: '#8b7bf7',
-                            padding: '8px 16px',
-                            borderRadius: '16px',
-                            fontSize: '14px',
+                            padding: '6px 12px',
+                            borderRadius: '12px',
+                            fontSize: '13px',
                             fontWeight: '600',
                             border: '1px solid #ddd6fe'
                           }}
@@ -1662,22 +1693,21 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '16px' }}>
                     <label style={{
                       display: 'block',
                       color: '#ff8fab',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: 'bold',
-                      marginBottom: '10px'
+                      marginBottom: '8px'
                     }}>🎹 升降调</label>
                     <div style={{
-                      fontSize: '20px',
-                      marginTop: '12px',
+                      fontSize: '16px',
                       fontWeight: 'bold',
                       color: selectedSong.key === null ? '#9e9e9e' : '#6bb3c7',
                       background: selectedSong.key === null ? '#f5f5f5' : '#f0f9ff',
-                      padding: '10px 16px',
-                      borderRadius: '16px',
+                      padding: '8px 14px',
+                      borderRadius: '14px',
                       border: selectedSong.key === null ? '2px solid #9e9e9e' : '2px solid #6bb3c7',
                       display: 'inline-block'
                     }}>
@@ -1686,24 +1716,24 @@ export default function Home() {
                   </div>
 
                   {selectedSong.tags.length > 0 && (
-                    <div style={{ marginBottom: '24px' }}>
+                    <div style={{ marginBottom: '16px' }}>
                       <label style={{
                         display: 'block',
                         color: '#ff8fab',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 'bold',
-                        marginBottom: '10px'
+                        marginBottom: '8px'
                       }}>🏷️ 标签</label>
-                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         {selectedSong.tags.map((tag, i) => (
                           <span
                             key={i}
                             style={{
-                              background: 'linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%)',
+                              background: '#e8f5e9',
                               color: '#2e7d32',
-                              padding: '8px 16px',
-                              borderRadius: '16px',
-                              fontSize: '14px',
+                              padding: '6px 12px',
+                              borderRadius: '12px',
+                              fontSize: '13px',
                               fontWeight: '500'
                             }}
                           >
@@ -1714,23 +1744,23 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{ color: '#ff6b9d', fontSize: '14px', fontWeight: 'bold' }}>📝 备注</label>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ color: '#ff6b9d', fontSize: '13px', fontWeight: 'bold' }}>📝 备注</label>
                     <div style={{
-                      marginTop: '10px',
-                      padding: '16px 20px',
-                      background: selectedSong.notes ? 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)' : '#f8f9fa',
-                      borderRadius: '18px',
+                      marginTop: '8px',
+                      padding: '12px 16px',
+                      background: selectedSong.notes ? '#fff5f8' : '#f8f9fa',
+                      borderRadius: '14px',
                       border: '2px solid ' + (selectedSong.notes ? '#ffd6e7' : '#e9ecef'),
-                      minHeight: selectedSong.notes ? 'auto' : '60px',
+                      minHeight: selectedSong.notes ? 'auto' : '50px',
                       display: 'flex',
                       alignItems: 'center',
                       transition: 'all 0.3s ease'
                     }}>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: '14px',
                         color: selectedSong.notes ? '#ff6b9d' : '#adb5bd',
-                        lineHeight: '1.6'
+                        lineHeight: '1.5'
                       }}>
                         {selectedSong.notes ? selectedSong.notes : '无备注~'}
                       </span>
@@ -1739,40 +1769,40 @@ export default function Home() {
 
                   <div style={{
                     color: '#ff8fab',
-                    fontSize: '13px',
-                    marginBottom: '24px',
-                    padding: '12px 16px',
+                    fontSize: '12px',
+                    marginBottom: '16px',
+                    padding: '10px 12px',
                     background: '#fff0f5',
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     border: '1px dashed #ffd6e7'
                   }}>
                     🕐 添加时间: {new Date(selectedSong.createdAt).toLocaleString('zh-CN')}
                   </div>
 
                   {isAdmin ? (
-                    <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
                       <button
                         onClick={startEdit}
                         style={{
                           flex: 1,
-                          background: 'linear-gradient(135deg, #2196F3 0%, #64b5f6 100%)',
+                          background: '#2196F3',
                           color: 'white',
                           border: 'none',
-                          padding: '14px 24px',
-                          borderRadius: '20px',
+                          padding: '12px 20px',
+                          borderRadius: '16px',
                           cursor: 'pointer',
-                          fontSize: '16px',
+                          fontSize: '14px',
                           fontWeight: 'bold',
-                          boxShadow: '0 4px 16px rgba(33, 150, 243, 0.35)',
+                          boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
                           transition: 'all 0.3s ease'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.45)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(33, 150, 243, 0.4)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(33, 150, 243, 0.35)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
                         }}
                       >
                         编辑 ✏️
@@ -1780,16 +1810,16 @@ export default function Home() {
                       <button
                         onClick={() => removeSong(selectedSong.id)}
                         style={{
-                          width: '48px',
-                          height: '48px',
-                          background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                          width: '44px',
+                          height: '44px',
+                          background: '#f44336',
                           color: 'white',
                           border: 'none',
                           borderRadius: '12px',
                           cursor: 'pointer',
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: 'bold',
-                          boxShadow: '0 4px 16px rgba(244, 67, 54, 0.35)',
+                          boxShadow: '0 4px 12px rgba(244, 67, 54, 0.3)',
                           transition: 'all 0.3s ease',
                           display: 'flex',
                           alignItems: 'center',
@@ -1798,11 +1828,11 @@ export default function Home() {
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(244, 67, 54, 0.45)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(244, 67, 54, 0.4)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 67, 54, 0.35)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(244, 67, 54, 0.3)';
                         }}
                         title="删除"
                       >
@@ -1811,12 +1841,12 @@ export default function Home() {
                     </div>
                   ) : (
                     <div style={{
-                      padding: '16px',
-                      background: 'linear-gradient(135deg, #fff5f8 0%, #ffe8f0 100%)',
-                      borderRadius: '16px',
+                      padding: '14px',
+                      background: '#fff5f8',
+                      borderRadius: '14px',
                       textAlign: 'center',
                       color: '#ff6b9d',
-                      fontSize: '15px',
+                      fontSize: '14px',
                       border: '2px dashed #ffd6e7',
                       fontWeight: '500'
                     }}>
@@ -1827,21 +1857,21 @@ export default function Home() {
               )
             ) : (
               <div style={{
-                background: 'linear-gradient(145deg, #fff5f8 0%, #ffe8f0 100%)',
-                padding: '60px 40px',
-                borderRadius: '24px',
+                background: '#fff5f8',
+                padding: '40px 30px',
+                borderRadius: '20px',
                 textAlign: 'center',
                 color: '#ff8fab',
                 border: '2px dashed #ffd6e7',
-                boxShadow: '0 4px 16px rgba(255, 107, 157, 0.08)'
+                boxShadow: '0 2px 12px rgba(255, 107, 157, 0.06)'
               }}>
                 <div style={{
-                  fontSize: '48px',
-                  marginBottom: '16px',
+                  fontSize: '40px',
+                  marginBottom: '12px',
                   opacity: 0.8
                 }}>🎵</div>
                 <p style={{
-                  fontSize: '16px',
+                  fontSize: '14px',
                   margin: 0,
                   fontWeight: '500'
                 }}>点击左侧歌曲查看详情 ✨</p>
