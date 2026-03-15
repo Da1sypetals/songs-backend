@@ -350,6 +350,17 @@ export default function Home() {
         padding: '16px',
         minHeight: '100vh'
       }}>
+        <style>{`
+          .song-grid { column-count: 3; column-gap: 10px; }
+          .main-layout { display: flex; gap: 16px; align-items: flex-start; }
+          .left-panel { width: 64%; }
+          .right-panel { width: 36%; position: sticky; top: 16px; }
+          @media (max-width: 768px) {
+            .song-grid { column-count: 1; }
+            .left-panel { width: 50%; }
+            .right-panel { width: 50%; }
+          }
+        `}</style>
         {/* 登录弹窗 */}
         {showLoginModal && (
           <div style={{
@@ -714,9 +725,9 @@ export default function Home() {
           </button>
         )}
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+        <div className="main-layout">
           {/* 左侧：歌曲列表 + 新增表单 */}
-          <div style={{ width: '64%' }}>
+          <div className="left-panel">
             {/* 新增表单（在showForm时显示在列表上方） */}
             {isAdmin && showForm && (
               <form
@@ -1082,10 +1093,7 @@ export default function Home() {
             )}
 
             {/* 歌曲列表 */}
-            <div style={{
-              columnCount: 3,
-              columnGap: '10px'
-            }}>
+            <div className="song-grid">
               {filteredSongs.map((song) => (
                 <div
                   key={song.id}
@@ -1133,7 +1141,7 @@ export default function Home() {
                       fontSize: '10px',
                       fontWeight: 'bold'
                     }}>
-                      featured
+                      ⭐
                     </div>
                   )}
 
@@ -1142,7 +1150,7 @@ export default function Home() {
                     fontSize: '14px',
                     marginBottom: '6px',
                     color: '#333',
-                    paddingRight: song.featured ? '60px' : '0',
+                    paddingRight: song.featured ? '34px' : '0',
                     lineHeight: '1.3'
                   }}>
                     {song.name}
@@ -1255,11 +1263,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{
-            width: '36%',
-            position: 'sticky',
-            top: '16px'
-          }}>
+          <div className="right-panel">
             {selectedSong ? (
               isEditing ? (
                 // 编辑模式
