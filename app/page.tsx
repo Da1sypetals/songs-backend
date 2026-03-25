@@ -54,6 +54,7 @@ export default function Home() {
 
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isRandomPick, setIsRandomPick] = useState(false);
 
   // 编辑表单状态
   const [editName, setEditName] = useState('');
@@ -320,6 +321,14 @@ export default function Home() {
     if (key > 0) return `+${key}`;
     if (key < 0) return `${key}`;
     return '原调';
+  };
+
+  const pickRandomSong = () => {
+    if (songs.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * songs.length);
+    setSelectedSong(songs[randomIndex]);
+    setIsEditing(false);
+    setIsRandomPick(true);
   };
 
   useEffect(() => {
@@ -694,36 +703,66 @@ export default function Home() {
           </div>
         </div>
 
-        {isAdmin && (
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          {isAdmin && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              style={{
+                background: showForm ? '#6c757d' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '14px 28px',
+                borderRadius: '24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                boxShadow: showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!showForm) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)';
+              }}
+            >
+              {showForm ? '取消' : '添加歌曲'}
+            </button>
+          )}
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={pickRandomSong}
+            disabled={songs.length === 0}
             style={{
-              background: showForm ? '#6c757d' : 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+              background: 'linear-gradient(135deg,rgb(239, 202, 80) 0%,rgb(249, 153, 105) 100%)',
               color: 'white',
               border: 'none',
               padding: '14px 28px',
               borderRadius: '24px',
-              cursor: 'pointer',
+              cursor: songs.length === 0 ? 'not-allowed' : 'pointer',
               fontSize: '16px',
               fontWeight: 'bold',
-              marginBottom: '24px',
-              boxShadow: showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)',
-              transition: 'all 0.3s ease'
+              boxShadow: '0 4px 16px rgba(246, 211, 101, 0.4)',
+              transition: 'all 0.3s ease',
+              opacity: songs.length === 0 ? 0.5 : 1
             }}
             onMouseEnter={(e) => {
-              if (!showForm) {
+              if (songs.length > 0) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.45)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(246, 211, 101, 0.5)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = showForm ? '0 2px 8px rgba(0,0,0,0.1)' : '0 4px 16px rgba(255, 107, 157, 0.35)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(246, 211, 101, 0.4)';
             }}
           >
-            {showForm ? '取消' : '添加歌曲'}
+            🎲 随机一首
           </button>
-        )}
+        </div>
 
         <div className="main-layout">
           {/* 左侧：歌曲列表 + 新增表单 */}
@@ -1100,6 +1139,7 @@ export default function Home() {
                   onClick={() => {
                     setSelectedSong(song);
                     setIsEditing(false);
+                    setIsRandomPick(false);
                   }}
                   style={{
                     background: selectedSong?.id === song.id ? '#fff5f8' : '#ffffff',
@@ -1639,12 +1679,34 @@ export default function Home() {
               ) : (
                 // 查看模式
                 <div style={{
-                  background: '#ffffff',
+                  background: isRandomPick ? '#fffef5' : '#ffffff',
                   padding: '20px',
                   borderRadius: '20px',
-                  boxShadow: '0 2px 16px rgba(255, 107, 157, 0.12)',
-                  border: '2px solid #ffd6e7'
+                  boxShadow: isRandomPick
+                    ? '0 2px 20px rgba(218, 165, 32, 0.18)'
+                    : '0 2px 16px rgba(255, 107, 157, 0.12)',
+                  border: isRandomPick ? '2px solidrgb(194, 146, 26)' : '2px solid #ffd6e7',
+                  position: 'relative'
                 }}>
+                  {isRandomPick && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-16px',
+                      right: '-16px',
+                      width: '44px',
+                      height: '44px',
+                      background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '22px',
+                      boxShadow: '0 3px 12px rgba(218, 165, 32, 0.35)',
+                      border: '2px solid #daa520'
+                    }}>
+                      🎲
+                    </div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                     <h2 style={{
                       fontSize: '20px',
