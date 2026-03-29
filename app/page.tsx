@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { Song, CreateSongRequest } from '@/types/song';
+import { matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
 // 从环境变量读取密码，默认为 'daisy2024'
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_SONGLIST_PASSWORD?.trim() || 'daisy2024';
@@ -48,6 +49,11 @@ export default function Home() {
   const [searchName, setSearchName] = useState('');
   const [searchSinger, setSearchSinger] = useState('');
   const [searchTag, setSearchTag] = useState('');
+
+  // 拼音搜索：使用 useDeferredValue 保持输入框即时响应
+  const deferredName   = useDeferredValue(searchName);
+  const deferredSinger = useDeferredValue(searchSinger);
+  const deferredTag    = useDeferredValue(searchTag);
 
   // 主打歌筛选状态
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
@@ -131,7 +137,19 @@ export default function Home() {
     }
   };
 
-  // 过滤并排序歌曲
+  // 数据加载后预热拼音缓存，确保首次搜索时无延迟
+  useEffect(() => {
+    if (!songs.length) return;
+    const texts = new Set<string>();
+    songs.forEach(s => {
+      texts.add(s.name);
+      s.singers.forEach(x => texts.add(x));
+      s.tags.forEach(x => texts.add(x));
+    });
+    queueMicrotask(() => preloadPinyinCache(Array.from(texts)));
+  }, [songs]);
+
+  // 过滤并排序歌曲（支持拼音搜索）
   const filteredSongs = useMemo(() => {
     const filtered = songs.filter(song => {
       // 主打歌筛选
@@ -139,30 +157,19 @@ export default function Home() {
         return false;
       }
 
-      // 歌名搜索
-      if (searchName.trim()) {
-        const searchLower = searchName.trim().toLowerCase();
-        if (!song.name.toLowerCase().includes(searchLower)) {
-          return false;
-        }
+      // 歌名搜索（支持拼音/首字母）
+      if (deferredName && !matchesPinyin(deferredName, song.name)) {
+        return false;
       }
 
-      // 歌手搜索
-      if (searchSinger.trim()) {
-        const searchLower = searchSinger.trim().toLowerCase();
-        const hasMatch = song.singers.some(singer =>
-          singer.toLowerCase().includes(searchLower)
-        );
-        if (!hasMatch) return false;
+      // 歌手搜索（支持拼音/首字母）
+      if (deferredSinger && !matchesPinyinArray(deferredSinger, song.singers)) {
+        return false;
       }
 
-      // Tag 搜索
-      if (searchTag.trim()) {
-        const searchLower = searchTag.trim().toLowerCase();
-        const hasMatch = song.tags.some(tag =>
-          tag.toLowerCase().includes(searchLower)
-        );
-        if (!hasMatch) return false;
+      // Tag 搜索（支持拼音/首字母）
+      if (deferredTag && !matchesPinyinArray(deferredTag, song.tags)) {
+        return false;
       }
 
       return true;
@@ -170,7 +177,7 @@ export default function Home() {
 
     // 应用排序
     return sortSongs(filtered);
-  }, [songs, searchName, searchSinger, searchTag, showFeaturedOnly]);
+  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly]);
 
   // 清除所有搜索
   const clearAllFilters = () => {
@@ -596,7 +603,7 @@ export default function Home() {
           }}>
             <input
               type="text"
-              placeholder="🔍 搜索歌名..."
+              placeholder="🔍 搜索歌名（支持拼音）..."
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               style={searchInputStyle}
@@ -611,7 +618,7 @@ export default function Home() {
             />
             <input
               type="text"
-              placeholder="🎤 搜索歌手..."
+              placeholder="🎤 搜索歌手（支持拼音）..."
               value={searchSinger}
               onChange={(e) => setSearchSinger(e.target.value)}
               style={searchInputStyle}
@@ -626,7 +633,7 @@ export default function Home() {
             />
             <input
               type="text"
-              placeholder="🏷️ 搜索标签..."
+              placeholder="🏷️ 搜索标签（支持拼音）..."
               value={searchTag}
               onChange={(e) => setSearchTag(e.target.value)}
               style={searchInputStyle}
