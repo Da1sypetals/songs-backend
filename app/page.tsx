@@ -367,12 +367,17 @@ export default function Home() {
         minHeight: '100vh'
       }}>
         <style>{`
-          .song-grid { column-count: 3; column-gap: 10px; }
+          .song-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            align-items: start;
+          }
           .main-layout { display: flex; gap: 16px; align-items: flex-start; }
           .left-panel { width: 64%; }
           .right-panel { width: 36%; position: sticky; top: 16px; }
           @media (max-width: 768px) {
-            .song-grid { column-count: 1; }
+            .song-grid { grid-template-columns: 1fr; }
             .left-panel { width: 50%; }
             .right-panel { width: 50%; }
           }
@@ -1159,8 +1164,7 @@ export default function Home() {
                     border: selectedSong?.id === song.id ? '2px solid #ff6b9d' : '2px solid #ffe8f0',
                     transition: 'all 0.3s ease',
                     position: 'relative',
-                    breakInside: 'avoid',
-                    marginBottom: '10px'
+                    minWidth: 0
                   }}
                   onMouseEnter={(e) => {
                     if (selectedSong?.id !== song.id) {
@@ -1269,7 +1273,7 @@ export default function Home() {
                   background: '#fff5f8',
                   borderRadius: '16px',
                   border: '2px dashed #ffd6e7',
-                  columnSpan: 'all'
+                  gridColumn: '1 / -1'
                 }}>
                   <div style={{
                     width: '40px',
@@ -1295,7 +1299,7 @@ export default function Home() {
                   borderRadius: '16px',
                   textAlign: 'center',
                   border: '2px dashed #ffd6e7',
-                  columnSpan: 'all'
+                  gridColumn: '1 / -1'
                 }}>
                   <p style={{
                     color: '#ff6b9d',
