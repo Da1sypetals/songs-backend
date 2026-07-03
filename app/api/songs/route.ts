@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { Song, SongMap } from '@/types/song';
+import { EnsembleType, Song, SongMap } from '@/types/song';
 
 const redis = Redis.fromEnv();
 const SONGLIST_KEY = 'songlist';
@@ -12,6 +12,10 @@ async function getSongMap(): Promise<SongMap> {
 
 async function setSongMap(songMap: SongMap): Promise<void> {
   await redis.set(SONGLIST_KEY, songMap);
+}
+
+function normalizeEnsembleType(value: unknown): EnsembleType {
+  return value === 'duet' || value === 'chorus' ? value : 'none';
 }
 
 // 获取所有歌曲
@@ -64,6 +68,7 @@ export async function POST(request: NextRequest) {
       key: key === null ? null : (typeof key === 'number' ? key : 0),
       notes: notes?.trim() || undefined,
       featured: body.featured === true,
+      ensembleType: normalizeEnsembleType(body.ensembleType),
       createdAt: new Date().toISOString()
     };
 

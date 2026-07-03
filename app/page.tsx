@@ -1,12 +1,71 @@
 'use client';
 
 import { useState, useEffect, useMemo, useDeferredValue } from 'react';
-import { Song, CreateSongRequest } from '@/types/song';
+import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
 import { matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
 // 从环境变量读取密码，默认为 'daisy2024'
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_SONGLIST_PASSWORD?.trim() || 'daisy2024';
 const ADMIN_KEY = 'isAdmin';
+const ENSEMBLE_OPTIONS: { value: EnsembleType; label: string }[] = [
+  { value: 'none', label: 'none' },
+  { value: 'duet', label: '对唱' },
+  { value: 'chorus', label: '合唱' }
+];
+
+function normalizeEnsembleType(value: Song['ensembleType']): EnsembleType {
+  return value === 'duet' || value === 'chorus' ? value : 'none';
+}
+
+function getEnsembleIcon(value: Song['ensembleType']) {
+  const ensembleType = normalizeEnsembleType(value);
+  if (ensembleType === 'duet') return '👫';
+  if (ensembleType === 'chorus') return '👥';
+  return null;
+}
+
+function EnsembleTypeControl({
+  value,
+  onChange,
+  compact = false
+}: {
+  value: EnsembleType;
+  onChange: (value: EnsembleType) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: compact ? '6px' : '8px'
+    }}>
+      {ENSEMBLE_OPTIONS.map((option) => {
+        const selected = value === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            style={{
+              padding: compact ? '8px 12px' : '10px 14px',
+              borderRadius: compact ? '10px' : '12px',
+              border: selected ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+              background: selected ? '#fff5f8' : '#ffffff',
+              color: selected ? '#ff6b9d' : '#ff8fab',
+              cursor: 'pointer',
+              fontSize: compact ? '13px' : '14px',
+              fontWeight: 'bold',
+              minWidth: compact ? '64px' : '72px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 /**
  * 对歌曲列表进行排序
@@ -44,6 +103,7 @@ export default function Home() {
   const [key, setKey] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [ensembleType, setEnsembleType] = useState<EnsembleType>('none');
 
   // 搜索框状态
   const [searchName, setSearchName] = useState('');
@@ -58,6 +118,17 @@ export default function Home() {
   // 主打歌筛选状态
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
+  // 合唱类型筛选状态（默认全部选中）
+  const [ensembleFilter, setEnsembleFilter] = useState<Record<EnsembleType, boolean>>({
+    none: true,
+    duet: true,
+    chorus: true
+  });
+
+  const toggleEnsembleFilter = (type: EnsembleType) => {
+    setEnsembleFilter(prev => ({ ...prev, [type]: !prev[type] }));
+  };
+
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isRandomPick, setIsRandomPick] = useState(false);
@@ -69,6 +140,7 @@ export default function Home() {
   const [editKey, setEditKey] = useState<number | null>(null);
   const [editNotes, setEditNotes] = useState('');
   const [editFeatured, setEditFeatured] = useState(false);
+  const [editEnsembleType, setEditEnsembleType] = useState<EnsembleType>('none');
 
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -157,6 +229,11 @@ export default function Home() {
         return false;
       }
 
+      // 合唱类型筛选
+      if (!ensembleFilter[normalizeEnsembleType(song.ensembleType)]) {
+        return false;
+      }
+
       // 歌名搜索（支持拼音/首字母）
       if (deferredName && !matchesPinyin(deferredName, song.name)) {
         return false;
@@ -177,7 +254,7 @@ export default function Home() {
 
     // 应用排序
     return sortSongs(filtered);
-  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly]);
+  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, ensembleFilter]);
 
   // 清除所有搜索
   const clearAllFilters = () => {
@@ -185,6 +262,7 @@ export default function Home() {
     setSearchSinger('');
     setSearchTag('');
     setShowFeaturedOnly(false);
+    setEnsembleFilter({ none: true, duet: true, chorus: true });
   };
 
   const addSong = async (e: React.FormEvent) => {
@@ -205,7 +283,8 @@ export default function Home() {
         tags,
         key,
         notes: notes.trim() || undefined,
-        featured
+        featured,
+        ensembleType
       };
 
       const response = await fetch('/api/songs', {
@@ -222,6 +301,7 @@ export default function Home() {
         setKey(0);
         setNotes('');
         setFeatured(false);
+        setEnsembleType('none');
         setShowForm(false);
         fetchSongs(true);
       } else {
@@ -272,6 +352,7 @@ export default function Home() {
     setEditKey(selectedSong.key);
     setEditNotes(selectedSong.notes || '');
     setEditFeatured(selectedSong.featured || false);
+    setEditEnsembleType(normalizeEnsembleType(selectedSong.ensembleType));
     setIsEditing(true);
   };
 
@@ -303,7 +384,8 @@ export default function Home() {
           tags,
           key: editKey,
           notes: editNotes.trim() || undefined,
-          featured: editFeatured
+          featured: editFeatured,
+          ensembleType: editEnsembleType
         })
       });
 
@@ -701,6 +783,49 @@ export default function Home() {
             >
               清除搜索
             </button>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              alignSelf: 'stretch',
+              gap: '4px',
+              marginLeft: 'auto',
+              background: '#fff5f8',
+              border: '2px solid #ffd6e7',
+              borderRadius: '16px',
+              padding: '0 8px'
+            }}>
+              {ENSEMBLE_OPTIONS.map((option) => {
+                  const active = ensembleFilter[option.value];
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => toggleEnsembleFilter(option.value)}
+                      style={{
+                        background: active ? '#ff6b9d' : '#ffffff',
+                        color: active ? 'white' : '#ff8fab',
+                        border: active ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                        padding: '5px 10px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        opacity: active ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+            </div>
           </div>
           <div style={{
             color: '#ff8fab',
@@ -1039,6 +1164,21 @@ export default function Home() {
                   </div>
                 </div>
 
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '10px',
+                    fontWeight: 'bold',
+                    color: '#ff6b9d'
+                  }}>
+                    👥 合唱类型
+                  </label>
+                  <EnsembleTypeControl
+                    value={ensembleType}
+                    onChange={setEnsembleType}
+                  />
+                </div>
+
                 {/* 第三行：notes（最大化） | featured（紧凑） */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'flex-end' }}>
                   <div style={{ flex: 1 }}>
@@ -1155,7 +1295,7 @@ export default function Home() {
                   }}
                   style={{
                     background: selectedSong?.id === song.id ? '#fff5f8' : '#ffffff',
-                    padding: '12px',
+                    padding: getEnsembleIcon(song.ensembleType) ? '12px 38px 12px 12px' : '12px',
                     borderRadius: '12px',
                     boxShadow: selectedSong?.id === song.id
                       ? '0 2px 10px rgba(255, 107, 157, 0.2)'
@@ -1193,6 +1333,20 @@ export default function Home() {
                       fontWeight: 'bold'
                     }}>
                       ⭐
+                    </div>
+                  )}
+                  {getEnsembleIcon(song.ensembleType) && (
+                    <div style={{
+                      position: 'absolute',
+                      right: '8px',
+                      bottom: '8px',
+                      fontSize: '20px',
+                      lineHeight: 1,
+                      background: '#ffd7a8',
+                      borderRadius: '10px',
+                      padding: '2px'
+                    }}>
+                      {getEnsembleIcon(song.ensembleType)}
                     </div>
                   )}
 
@@ -1566,6 +1720,22 @@ export default function Home() {
                         未定调
                       </button>
                     </div>
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '10px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d'
+                    }}>
+                      👥 合唱类型
+                    </label>
+                    <EnsembleTypeControl
+                      value={editEnsembleType}
+                      onChange={setEditEnsembleType}
+                      compact
+                    />
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>
