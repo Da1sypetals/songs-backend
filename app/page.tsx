@@ -758,6 +758,54 @@ export default function Home() {
             >
               {showFeaturedOnly ? '⭐ featured' : '☆ featured'}
             </button>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              alignSelf: 'stretch',
+              gap: '4px',
+              marginLeft: 'auto',
+              background: '#fff5f8',
+              border: '2px solid #ffd6e7',
+              borderRadius: '16px',
+              padding: '0 8px'
+            }}>
+              {ENSEMBLE_OPTIONS.map((option) => {
+                  const active = ensembleFilter[option.value];
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => toggleEnsembleFilter(option.value)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '28px',
+                        lineHeight: 1,
+                        background: active ? '#ff6b9d' : '#ffffff',
+                        color: active ? 'white' : '#ff8fab',
+                        border: active ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                        padding: '0 10px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        opacity: active ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+            </div>
             <button
               onClick={clearAllFilters}
               style={{
@@ -783,49 +831,6 @@ export default function Home() {
             >
               清除搜索
             </button>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              alignSelf: 'stretch',
-              gap: '4px',
-              marginLeft: 'auto',
-              background: '#fff5f8',
-              border: '2px solid #ffd6e7',
-              borderRadius: '16px',
-              padding: '0 8px'
-            }}>
-              {ENSEMBLE_OPTIONS.map((option) => {
-                  const active = ensembleFilter[option.value];
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => toggleEnsembleFilter(option.value)}
-                      style={{
-                        background: active ? '#ff6b9d' : '#ffffff',
-                        color: active ? 'white' : '#ff8fab',
-                        border: active ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
-                        padding: '5px 10px',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        opacity: active ? 1 : 0.6,
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-            </div>
           </div>
           <div style={{
             color: '#ff8fab',
@@ -1910,6 +1915,21 @@ export default function Home() {
                       <span>{selectedSong.featured ? '⭐' : '☆'}</span>
                       {selectedSong.featured && <span>featured</span>}
                     </div>
+                    {/* 合唱类型标识 */}
+                    {normalizeEnsembleType(selectedSong.ensembleType) !== 'none' && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 10px',
+                        backgroundColor: '#fda085',
+                        color: 'white',
+                        borderRadius: '10px',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}>
+                        {normalizeEnsembleType(selectedSong.ensembleType) === 'chorus' ? '合唱' : '对唱'}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>
