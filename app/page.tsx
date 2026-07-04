@@ -451,12 +451,18 @@ export default function Home() {
         padding: '16px',
         minHeight: '100vh'
       }}>
-        <style>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           .song-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
             align-items: start;
+          }
+          .song-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
           }
           .main-layout { display: flex; gap: 16px; align-items: flex-start; }
           .left-panel { width: 64%; }
@@ -466,7 +472,7 @@ export default function Home() {
             .left-panel { width: 50%; }
             .right-panel { width: 50%; }
           }
-        `}</style>
+        ` }} />
         {/* 登录弹窗 */}
         {showLoginModal && (
           <div style={{
@@ -1293,8 +1299,12 @@ export default function Home() {
 
             {/* 歌曲列表 */}
             <div className="song-grid">
-              {filteredSongs.map((song) => (
-                <div
+              {!isLoadingSongs && filteredSongs.length > 0 && [0, 1, 2].map((columnIndex) => (
+                <div key={columnIndex} className="song-column">
+                  {filteredSongs
+                    .filter((_, index) => index % 3 === columnIndex)
+                    .map((song) => (
+                      <div
                   key={song.id}
                   onClick={() => {
                     setSelectedSong(song);
@@ -1426,6 +1436,8 @@ export default function Home() {
                       </span>
                     )}
                   </div>
+                      </div>
+                    ))}
                 </div>
               ))}
               {isLoadingSongs ? (
