@@ -12,6 +12,11 @@ const ENSEMBLE_OPTIONS: { value: EnsembleType; label: string }[] = [
   { value: 'duet', label: '对唱' },
   { value: 'chorus', label: '合唱' }
 ];
+const EMPTY_ENSEMBLE_FILTER: Record<EnsembleType, boolean> = {
+  none: false,
+  duet: false,
+  chorus: false
+};
 
 function normalizeEnsembleType(value: Song['ensembleType']): EnsembleType {
   return value === 'duet' || value === 'chorus' ? value : 'none';
@@ -118,12 +123,8 @@ export default function Home() {
   // 主打歌筛选状态
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
-  // 合唱类型筛选状态（默认全部选中）
-  const [ensembleFilter, setEnsembleFilter] = useState<Record<EnsembleType, boolean>>({
-    none: true,
-    duet: true,
-    chorus: true
-  });
+  // 合唱类型筛选状态（默认不选；不选时等同于全选）
+  const [ensembleFilter, setEnsembleFilter] = useState<Record<EnsembleType, boolean>>(EMPTY_ENSEMBLE_FILTER);
 
   const toggleEnsembleFilter = (type: EnsembleType) => {
     setEnsembleFilter(prev => ({ ...prev, [type]: !prev[type] }));
@@ -223,6 +224,8 @@ export default function Home() {
 
   // 过滤并排序歌曲（支持拼音搜索）
   const filteredSongs = useMemo(() => {
+    const hasEnsembleFilter = Object.values(ensembleFilter).some(Boolean);
+
     const filtered = songs.filter(song => {
       // 主打歌筛选
       if (showFeaturedOnly && !song.featured) {
@@ -230,7 +233,7 @@ export default function Home() {
       }
 
       // 合唱类型筛选
-      if (!ensembleFilter[normalizeEnsembleType(song.ensembleType)]) {
+      if (hasEnsembleFilter && !ensembleFilter[normalizeEnsembleType(song.ensembleType)]) {
         return false;
       }
 
@@ -262,7 +265,7 @@ export default function Home() {
     setSearchSinger('');
     setSearchTag('');
     setShowFeaturedOnly(false);
-    setEnsembleFilter({ none: true, duet: true, chorus: true });
+    setEnsembleFilter(EMPTY_ENSEMBLE_FILTER);
   };
 
   const addSong = async (e: React.FormEvent) => {
