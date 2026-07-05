@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/backup-redis-to-gist",
+      "schedule": "5 16 * * *"
+    }
+  ]
+}
