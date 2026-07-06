@@ -162,6 +162,9 @@ export default function Home() {
   // 主打歌筛选状态
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
+  // 仅显示带音频的歌曲筛选状态（默认关闭）
+  const [showAudioOnly, setShowAudioOnly] = useState(false);
+
   // 合唱类型筛选状态（默认不选；不选时等同于全选）
   const [ensembleFilter, setEnsembleFilter] = useState<Record<EnsembleType, boolean>>(EMPTY_ENSEMBLE_FILTER);
 
@@ -283,6 +286,11 @@ export default function Home() {
         return false;
       }
 
+      // 仅显示带音频的歌曲
+      if (showAudioOnly && !song.hasAudio) {
+        return false;
+      }
+
       // 合唱类型筛选
       if (hasEnsembleFilter && !ensembleFilter[normalizeEnsembleType(song.ensembleType)]) {
         return false;
@@ -308,7 +316,7 @@ export default function Home() {
 
     // 应用排序
     return sortSongs(filtered);
-  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, ensembleFilter]);
+  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
 
   // 清除所有搜索
   const clearAllFilters = () => {
@@ -316,6 +324,7 @@ export default function Home() {
     setSearchSinger('');
     setSearchTag('');
     setShowFeaturedOnly(false);
+    setShowAudioOnly(false);
     setEnsembleFilter(EMPTY_ENSEMBLE_FILTER);
   };
 
@@ -1003,6 +1012,30 @@ export default function Home() {
                   );
                 })}
             </div>
+            <button
+              onClick={() => setShowAudioOnly(!showAudioOnly)}
+              title="只显示带音频的歌曲"
+              style={{
+                background: showAudioOnly ? '#ff6b9d' : '#fff5f8',
+                color: showAudioOnly ? 'white' : '#ff6b9d',
+                border: showAudioOnly ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                padding: '10px 16px',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              🎧
+            </button>
             <button
               onClick={clearAllFilters}
               style={{
