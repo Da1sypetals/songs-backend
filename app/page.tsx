@@ -1558,6 +1558,22 @@ export default function Home() {
                     }
                   }}
                 >
+                  {/* 音频标识 - 位于右上角，featured 左侧 */}
+                  {song.hasAudio && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: song.featured ? '34px' : '8px',
+                      padding: '2px 6px',
+                      backgroundColor: '#fce4ec',
+                      color: '#ff6b9d',
+                      borderRadius: '8px',
+                      fontSize: '10px',
+                      fontWeight: 'bold'
+                    }}>
+                      🎧
+                    </div>
+                  )}
                   {/* 主打歌标识 - 仅主打歌显示 */}
                   {song.featured && (
                     <div style={{
@@ -1594,7 +1610,7 @@ export default function Home() {
                     fontSize: '14px',
                     marginBottom: '6px',
                     color: '#333',
-                    paddingRight: song.featured ? '34px' : '0',
+                    paddingRight: song.featured && song.hasAudio ? '62px' : (song.featured || song.hasAudio ? '34px' : '0'),
                     lineHeight: '1.3'
                   }}>
                     {song.name}
@@ -1629,19 +1645,6 @@ export default function Home() {
                     }}>
                       {formatKey(song.key)}
                     </span>
-                    {song.hasAudio && (
-                      <span style={{
-                        background: '#fce4ec',
-                        color: '#ff6b9d',
-                        padding: '3px 8px',
-                        borderRadius: '10px',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
-                        border: '1px solid #ffd6e7'
-                      }}>
-                        🎧
-                      </span>
-                    )}
                     {song.tags.slice(0, 2).map((tag, i) => (
                       <span
                         key={i}
