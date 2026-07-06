@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import { NextRequest, NextResponse } from 'next/server';
 import { EnsembleType, Song, SongMap } from '@/types/song';
+import { deleteAudioObject, getAudioObjectKey, getBackblazeAudioConfig } from '@/lib/backblaze-audio';
 
 const redis = Redis.fromEnv();
 const SONGLIST_KEY = 'songlist';
@@ -89,6 +90,8 @@ export async function PUT(
       notes: notes?.trim() || undefined,
       featured: body.featured === true,
       ensembleType: normalizeEnsembleType(body.ensembleType),
+      hasAudio: existingSong.hasAudio,
+      audioMeta: existingSong.audioMeta,
       createdAt: existingSong.createdAt
     };
 
@@ -120,6 +123,11 @@ export async function DELETE(
         success: false,
         error: '歌曲不存在'
       }, { status: 404 });
+    }
+
+    const song = songMap[params.id];
+    if (song.hasAudio) {
+      await deleteAudioObject(await getBackblazeAudioConfig(redis), song.audioMeta?.objectKey || getAudioObjectKey(params.id));
     }
 
     delete songMap[params.id];

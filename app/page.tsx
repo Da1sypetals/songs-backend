@@ -18,8 +18,42 @@ const EMPTY_ENSEMBLE_FILTER: Record<EnsembleType, boolean> = {
   chorus: false
 };
 
+const MAX_AUDIO_DURATION_SECONDS = 150;
+
 function normalizeEnsembleType(value: Song['ensembleType']): EnsembleType {
   return value === 'duet' || value === 'chorus' ? value : 'none';
+}
+
+// 读取文件为 base64（去掉 data URL 前缀）
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const commaIndex = result.indexOf(',');
+      resolve(result.slice(commaIndex + 1));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('读取音频文件失败'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// 通过 audio 元素读取音频时长（秒）
+function getAudioDurationSeconds(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const audio = document.createElement('audio');
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve(audio.duration);
+    };
+    audio.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('无法读取音频时长'));
+    };
+    audio.src = url;
+  });
 }
 
 function getEnsembleIcon(value: Song['ensembleType']) {
@@ -142,6 +176,17 @@ export default function Home() {
   const [editNotes, setEditNotes] = useState('');
   const [editFeatured, setEditFeatured] = useState(false);
   const [editEnsembleType, setEditEnsembleType] = useState<EnsembleType>('none');
+
+  // 音频编辑状态
+  const [editAudioFile, setEditAudioFile] = useState<File | null>(null);
+  const [editAudioDuration, setEditAudioDuration] = useState<number | null>(null);
+  const [editAudioRemoved, setEditAudioRemoved] = useState(false);
+  const [editAudioError, setEditAudioError] = useState('');
+  const [editAudioDragging, setEditAudioDragging] = useState(false);
+
+  // 查看模式的音频播放
+  const [audioSrc, setAudioSrc] = useState<string | null>(null);
+  const [audioLoading, setAudioLoading] = useState(false);
 
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -356,12 +401,60 @@ export default function Home() {
     setEditNotes(selectedSong.notes || '');
     setEditFeatured(selectedSong.featured || false);
     setEditEnsembleType(normalizeEnsembleType(selectedSong.ensembleType));
+    setEditAudioFile(null);
+    setEditAudioDuration(null);
+    setEditAudioRemoved(false);
+    setEditAudioError('');
     setIsEditing(true);
   };
 
   // 取消编辑
   const cancelEdit = () => {
+    setEditAudioFile(null);
+    setEditAudioDuration(null);
+    setEditAudioRemoved(false);
+    setEditAudioError('');
     setIsEditing(false);
+  };
+
+  // 音频文件的客户端校验（供选择与拖拽共用）
+  const processAudioFile = async (file: File) => {
+    setEditAudioError('');
+
+    const isMp3 = file.type === 'audio/mpeg' || file.name.toLowerCase().endsWith('.mp3');
+    if (!isMp3) {
+      setEditAudioError('只允许上传 MP3 文件');
+      setEditAudioFile(null);
+      setEditAudioDuration(null);
+      return;
+    }
+
+    const duration = await getAudioDurationSeconds(file);
+    if (!Number.isFinite(duration) || duration <= 0 || duration > MAX_AUDIO_DURATION_SECONDS) {
+      setEditAudioError(`音频时长必须大于 0 且不超过 ${MAX_AUDIO_DURATION_SECONDS} 秒`);
+      setEditAudioFile(null);
+      setEditAudioDuration(null);
+      return;
+    }
+
+    setEditAudioFile(file);
+    setEditAudioDuration(duration);
+    setEditAudioRemoved(false);
+  };
+
+  const handleEditAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processAudioFile(file);
+    e.target.value = '';
+  };
+
+  const handleEditAudioDrop = async (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setEditAudioDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    await processAudioFile(file);
   };
 
   // 保存编辑
@@ -393,13 +486,50 @@ export default function Home() {
       });
 
       const data = await response.json();
-      if (data.success) {
-        setIsEditing(false);
-        setSelectedSong(data.data);
-        fetchSongs(true);
-      } else {
+      if (!data.success) {
         alert(data.error || '更新失败');
+        return;
       }
+
+      let updatedSong: Song = data.data;
+
+      if (editAudioFile) {
+        const base64 = await readFileAsBase64(editAudioFile);
+        const audioResponse = await fetch(`/api/songs/${selectedSong.id}/audio`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            base64,
+            fileName: editAudioFile.name,
+            contentType: 'audio/mpeg',
+            durationSeconds: editAudioDuration
+          })
+        });
+        const audioData = await audioResponse.json();
+        if (!audioData.success) {
+          alert(audioData.error || '音频上传失败');
+          return;
+        }
+        updatedSong = audioData.data;
+      } else if (editAudioRemoved && selectedSong.hasAudio) {
+        const deleteResponse = await fetch(`/api/songs/${selectedSong.id}/audio`, {
+          method: 'DELETE'
+        });
+        const deleteData = await deleteResponse.json();
+        if (!deleteData.success) {
+          alert(deleteData.error || '音频移除失败');
+          return;
+        }
+        updatedSong = deleteData.data;
+      }
+
+      setIsEditing(false);
+      setSelectedSong(updatedSong);
+      setEditAudioFile(null);
+      setEditAudioDuration(null);
+      setEditAudioRemoved(false);
+      setEditAudioError('');
+      fetchSongs(true);
     } catch (error) {
       console.error('更新歌曲失败:', error);
       alert('更新失败');
@@ -426,6 +556,34 @@ export default function Home() {
   useEffect(() => {
     fetchSongs();
   }, []);
+
+  // 查看模式下加载选中歌曲的音频用于试听
+  useEffect(() => {
+    if (!selectedSong || isEditing || !selectedSong.hasAudio) {
+      setAudioSrc(null);
+      setAudioLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setAudioSrc(null);
+    setAudioLoading(true);
+    fetch(`/api/songs/${selectedSong.id}/audio`)
+      .then(response => response.json())
+      .then(data => {
+        if (cancelled) return;
+        if (data.success) {
+          setAudioSrc(`data:${data.data.contentType};base64,${data.data.base64}`);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setAudioLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSong, isEditing]);
 
   // 搜索框样式 - 浅粉色主题
   const searchInputStyle = {
@@ -1408,6 +1566,19 @@ export default function Home() {
                     }}>
                       {formatKey(song.key)}
                     </span>
+                    {song.hasAudio && (
+                      <span style={{
+                        background: '#fce4ec',
+                        color: '#ff6b9d',
+                        padding: '3px 8px',
+                        borderRadius: '10px',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        border: '1px solid #ffd6e7'
+                      }}>
+                        🎧
+                      </span>
+                    )}
                     {song.tags.slice(0, 2).map((tag, i) => (
                       <span
                         key={i}
@@ -1509,7 +1680,8 @@ export default function Home() {
                     fontWeight: 'bold'
                   }}>编辑歌曲</h2>
 
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+                  <div style={{ marginBottom: '20px', flex: 1 }}>
                     <label style={{
                       display: 'block',
                       marginBottom: '10px',
@@ -1545,7 +1717,7 @@ export default function Home() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '20px', flex: 1 }}>
                     <label style={{
                       display: 'block',
                       marginBottom: '10px',
@@ -1579,6 +1751,7 @@ export default function Home() {
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     />
+                  </div>
                   </div>
 
                   <div style={{ marginBottom: '20px' }}>
@@ -1742,7 +1915,8 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', marginBottom: '16px' }}>
+                  <div style={{ flex: 1 }}>
                     <label style={{
                       display: 'block',
                       marginBottom: '10px',
@@ -1758,7 +1932,7 @@ export default function Home() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '16px' }}>
+                  <div style={{ flex: 1 }}>
                     <label style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1785,6 +1959,7 @@ export default function Home() {
                       />
                       <span>⭐ featured</span>
                     </label>
+                  </div>
                   </div>
 
                   <div style={{ marginBottom: '20px' }}>
@@ -1817,6 +1992,138 @@ export default function Home() {
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     />
+                  </div>
+
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '10px',
+                      fontWeight: 'bold',
+                      color: '#ff6b9d'
+                    }}>
+                      🎧 歌曲音频（MP3，≤{MAX_AUDIO_DURATION_SECONDS} 秒）
+                    </label>
+
+                    {selectedSong?.hasAudio && !editAudioRemoved && !editAudioFile && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        marginBottom: '10px',
+                        background: '#fff5f8',
+                        borderRadius: '14px',
+                        border: '2px solid #ffd6e7'
+                      }}>
+                        <span style={{ fontSize: '13px', color: '#ff6b9d', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          🎵 {selectedSong.audioMeta?.fileName ?? '已上传音频'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setEditAudioRemoved(true)}
+                          style={{
+                            flexShrink: 0,
+                            padding: '6px 12px',
+                            borderRadius: '10px',
+                            border: '2px solid #f44336',
+                            background: '#fff',
+                            color: '#f44336',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          移除
+                        </button>
+                      </div>
+                    )}
+
+                    {editAudioRemoved && !editAudioFile && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        marginBottom: '10px',
+                        background: '#fff0f0',
+                        borderRadius: '14px',
+                        border: '2px dashed #f44336'
+                      }}>
+                        <span style={{ fontSize: '13px', color: '#f44336', fontWeight: 'bold' }}>
+                          已标记移除，保存后生效
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setEditAudioRemoved(false)}
+                          style={{
+                            flexShrink: 0,
+                            padding: '6px 12px',
+                            borderRadius: '10px',
+                            border: '2px solid #ffd6e7',
+                            background: '#fff',
+                            color: '#ff6b9d',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          撤销
+                        </button>
+                      </div>
+                    )}
+
+                    <label
+                      onDragOver={(e) => { e.preventDefault(); setEditAudioDragging(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); setEditAudioDragging(false); }}
+                      onDrop={handleEditAudioDrop}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        width: '100%',
+                        padding: '22px 16px',
+                        borderRadius: '16px',
+                        border: `2px dashed ${editAudioDragging ? '#ff6b9d' : '#ffd6e7'}`,
+                        background: editAudioDragging ? '#ffe8f0' : '#fff8fb',
+                        cursor: 'pointer',
+                        boxSizing: 'border-box',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="audio/mpeg,.mp3"
+                        onChange={handleEditAudioChange}
+                        style={{ display: 'none' }}
+                      />
+                      <span style={{ fontSize: '26px', lineHeight: 1 }}>{editAudioFile ? '🎵' : '🎧'}</span>
+                      {editAudioFile ? (
+                        <span style={{ fontSize: '13px', color: '#ff6b9d', fontWeight: 'bold', wordBreak: 'break-all' }}>
+                          {editAudioFile.name}
+                          {editAudioDuration !== null && `（${Math.round(editAudioDuration)} 秒）`}
+                        </span>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: '14px', color: '#ff6b9d', fontWeight: 'bold' }}>
+                            点击选择或拖拽 MP3 到此处
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#ff8fab' }}>
+                            仅支持 MP3，时长 ≤ {MAX_AUDIO_DURATION_SECONDS} 秒
+                          </span>
+                        </>
+                      )}
+                    </label>
+
+                    {editAudioError && (
+                      <div style={{ marginTop: '10px', fontSize: '13px', color: '#ff4757', fontWeight: 'bold' }}>
+                        {editAudioError}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px' }}>
@@ -2048,6 +2355,25 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
+
+                  {selectedSong.hasAudio && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        color: '#ff8fab',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        marginBottom: '8px'
+                      }}>🎧 试听</label>
+                      {audioLoading ? (
+                        <div style={{ fontSize: '13px', color: '#ff8fab', fontWeight: '500' }}>加载中...</div>
+                      ) : audioSrc ? (
+                        <audio controls src={audioSrc} style={{ width: '100%' }} />
+                      ) : (
+                        <div style={{ fontSize: '13px', color: '#adb5bd', fontWeight: '500' }}>音频加载失败</div>
+                      )}
+                    </div>
+                  )}
 
                   <div style={{
                     color: '#ff8fab',

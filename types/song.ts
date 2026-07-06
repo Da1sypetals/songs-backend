@@ -1,5 +1,18 @@
 export type EnsembleType = 'none' | 'duet' | 'chorus';
 
+export interface SongAudioMeta {
+  fileName: string;
+  contentType: 'audio/mpeg';
+  byteSize: number;
+  durationSeconds: number;
+  updatedAt: string;
+  objectKey?: string;
+}
+
+export interface SongAudioRecord extends SongAudioMeta {
+  base64: string;
+}
+
 export interface Song {
   id: string;
   name: string;
@@ -9,6 +22,8 @@ export interface Song {
   notes?: string;
   featured?: boolean;
   ensembleType?: EnsembleType;
+  hasAudio?: boolean;
+  audioMeta?: SongAudioMeta;
   createdAt: string;
 }
 

@@ -5,15 +5,15 @@ export const dynamic = 'force-dynamic';
 
 const redis = Redis.fromEnv();
 const GIST_FILENAME = 'redis-backup.json';
+const BACKUP_KEYS = ['prompt-wall', 'songlist'] as const;
 
-async function getAllRedisData() {
-  const keys = await redis.keys('*');
+async function getRedisBackupData() {
   const entries = await Promise.all(
-    keys.map(async (key) => [key, await redis.get(key)] as const)
+    BACKUP_KEYS.map(async (key) => [key, await redis.get(key)] as const)
   );
 
   return {
-    keys,
+    keys: [...BACKUP_KEYS],
     data: Object.fromEntries(entries)
   };
 }
@@ -31,7 +31,7 @@ export async function GET() {
     }
 
     const backedUpAt = new Date().toISOString();
-    const { keys, data } = await getAllRedisData();
+    const { keys, data } = await getRedisBackupData();
 
     const response = await fetch(`https://api.github.com/gists/${gistId}`, {
       method: 'PATCH',
