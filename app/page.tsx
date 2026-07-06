@@ -664,6 +664,10 @@ export default function Home() {
           .main-layout { display: flex; gap: 16px; align-items: flex-start; }
           .left-panel { width: 64%; }
           .right-panel { width: 36%; position: sticky; top: 16px; }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
           @media (max-width: 768px) {
             .song-grid { grid-template-columns: 1fr; }
             .left-panel { width: 50%; }
@@ -2432,7 +2436,25 @@ export default function Home() {
                         marginBottom: '8px'
                       }}>🎧 试听</label>
                       {audioLoading ? (
-                        <div style={{ fontSize: '13px', color: '#ff8fab', fontWeight: '500' }}>加载中...</div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          fontSize: '13px',
+                          color: '#ff8fab',
+                          fontWeight: '500'
+                        }}>
+                          <span style={{
+                            width: '14px',
+                            height: '14px',
+                            border: '2px solid #ffe8f0',
+                            borderTop: '2px solid #ff6b9d',
+                            borderRadius: '50%',
+                            animation: 'spin 0.8s linear infinite',
+                            flexShrink: 0
+                          }} />
+                          <span>加载中...</span>
+                        </div>
                       ) : audioSrc ? (
                         <audio controls src={audioSrc} style={{ width: '100%' }} />
                       ) : (
