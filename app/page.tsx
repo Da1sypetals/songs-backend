@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useDeferredValue } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue, useRef } from 'react';
 import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
 import { matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
@@ -19,6 +19,11 @@ const EMPTY_ENSEMBLE_FILTER: Record<EnsembleType, boolean> = {
 };
 
 const MAX_AUDIO_DURATION_SECONDS = 150;
+
+type AudioCacheEntry = {
+  src: string;
+  updatedAt?: string;
+};
 
 function normalizeEnsembleType(value: Song['ensembleType']): EnsembleType {
   return value === 'duet' || value === 'chorus' ? value : 'none';
@@ -187,6 +192,7 @@ export default function Home() {
   // 查看模式的音频播放
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState(false);
+  const audioCacheRef = useRef<Record<string, AudioCacheEntry>>({});
 
   // 客户端缓存
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -511,6 +517,10 @@ export default function Home() {
           return;
         }
         updatedSong = audioData.data;
+        audioCacheRef.current[selectedSong.id] = {
+          src: `data:audio/mpeg;base64,${base64}`,
+          updatedAt: updatedSong.audioMeta?.updatedAt
+        };
       } else if (editAudioRemoved && selectedSong.hasAudio) {
         const deleteResponse = await fetch(`/api/songs/${selectedSong.id}/audio`, {
           method: 'DELETE'
@@ -521,6 +531,7 @@ export default function Home() {
           return;
         }
         updatedSong = deleteData.data;
+        delete audioCacheRef.current[selectedSong.id];
       }
 
       setIsEditing(false);
@@ -560,7 +571,20 @@ export default function Home() {
   // 查看模式下加载选中歌曲的音频用于试听
   useEffect(() => {
     if (!selectedSong || isEditing || !selectedSong.hasAudio) {
+      if (selectedSong && !selectedSong.hasAudio) {
+        delete audioCacheRef.current[selectedSong.id];
+      }
       setAudioSrc(null);
+      setAudioLoading(false);
+      return;
+    }
+
+    const songId = selectedSong.id;
+    const updatedAt = selectedSong.audioMeta?.updatedAt;
+    const cachedAudio = audioCacheRef.current[songId];
+
+    if (cachedAudio && cachedAudio.updatedAt === updatedAt) {
+      setAudioSrc(cachedAudio.src);
       setAudioLoading(false);
       return;
     }
@@ -568,12 +592,18 @@ export default function Home() {
     let cancelled = false;
     setAudioSrc(null);
     setAudioLoading(true);
-    fetch(`/api/songs/${selectedSong.id}/audio`)
+    fetch(`/api/songs/${songId}/audio`)
       .then(response => response.json())
       .then(data => {
-        if (cancelled) return;
         if (data.success) {
-          setAudioSrc(`data:${data.data.contentType};base64,${data.data.base64}`);
+          const src = `data:${data.data.contentType};base64,${data.data.base64}`;
+          audioCacheRef.current[songId] = {
+            src,
+            updatedAt: data.data.updatedAt
+          };
+          if (!cancelled) {
+            setAudioSrc(src);
+          }
         }
       })
       .finally(() => {
@@ -583,7 +613,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [selectedSong, isEditing]);
+  }, [selectedSong?.id, selectedSong?.hasAudio, selectedSong?.audioMeta?.updatedAt, isEditing]);
 
   // 搜索框样式 - 浅粉色主题
   const searchInputStyle = {
