@@ -192,6 +192,12 @@ export default function Home() {
   const [editAudioError, setEditAudioError] = useState('');
   const [editAudioDragging, setEditAudioDragging] = useState(false);
 
+  // 歌词弹窗状态
+  const [showLyricsModal, setShowLyricsModal] = useState(false);
+  const [lyricsEditing, setLyricsEditing] = useState(false);
+  const [lyricsText, setLyricsText] = useState('');
+  const [lyricsSaving, setLyricsSaving] = useState(false);
+
   // 查看模式的音频播放
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState(false);
@@ -558,6 +564,50 @@ export default function Home() {
     }
   };
 
+  // 歌词弹窗打开时锁定背景滚动
+  useEffect(() => {
+    if (!showLyricsModal) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [showLyricsModal]);
+
+  // 打开歌词弹窗
+  const openLyricsModal = () => {
+    if (!selectedSong) return;
+    setLyricsText(selectedSong.lyrics || '');
+    setLyricsEditing(false);
+    setShowLyricsModal(true);
+  };
+
+  // 保存歌词
+  const saveLyrics = async () => {
+    if (!isAdmin || !selectedSong) return;
+    setLyricsSaving(true);
+    try {
+      const response = await fetch(`/api/songs/${selectedSong.id}/lyrics`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lyrics: lyricsText })
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || '歌词保存失败');
+        return;
+      }
+      setSelectedSong(data.data);
+      setSongs(prev => prev.map(s => s.id === data.data.id ? data.data : s));
+      setLyricsEditing(false);
+    } catch (error) {
+      console.error('保存歌词失败:', error);
+      alert('保存失败');
+    } finally {
+      setLyricsSaving(false);
+    }
+  };
+
   const formatKey = (key: number | null) => {
     if (key === null) return '未定调';
     if (key > 0) return `+${key}`;
@@ -793,6 +843,268 @@ export default function Home() {
                   进入 ✨
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 歌词弹窗 */}
+        {showLyricsModal && selectedSong && (
+          <div
+            onClick={() => setShowLyricsModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(255, 182, 193, 0.4)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000,
+              padding: '16px'
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: '#fff5f8',
+                borderRadius: '24px',
+                width: '100%',
+                maxWidth: '640px',
+                maxHeight: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 8px 32px rgba(255, 107, 157, 0.25)',
+                border: '2px solid #ffd6e7',
+                overflow: 'hidden'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '16px 24px',
+                borderBottom: '2px solid #ffd6e7',
+                background: '#ffffff'
+              }}>
+                <h2 style={{
+                  fontSize: '18px',
+                  color: '#ff6b9d',
+                  fontWeight: 'bold',
+                  margin: 0,
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  🎶 {selectedSong.name} 歌词
+                </h2>
+                {isAdmin && !lyricsEditing && (
+                  <button
+                    onClick={() => { setLyricsText(selectedSong.lyrics || ''); setLyricsEditing(true); }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px 14px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 3px 10px rgba(255, 107, 157, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 5px 14px rgba(255, 107, 157, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 3px 10px rgba(255, 107, 157, 0.3)';
+                    }}
+                  >
+                    ✏️ 编辑
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowLyricsModal(false)}
+                  title="关闭"
+                  style={{
+                    flexShrink: 0,
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: '2px solid #ffd6e7',
+                    background: '#fff5f8',
+                    color: '#ff6b9d',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    lineHeight: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ffe8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#fff5f8';
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{
+                padding: '20px 24px',
+                overflowY: 'auto',
+                flex: 1
+              }}>
+                {lyricsEditing ? (
+                  <textarea
+                    value={lyricsText}
+                    onChange={(e) => setLyricsText(e.target.value)}
+                    placeholder="粘贴或输入歌词，每行一句..."
+                    style={{
+                      width: '100%',
+                      minHeight: '300px',
+                      padding: '14px 16px',
+                      borderRadius: '16px',
+                      border: '2px solid #ffd6e7',
+                      fontSize: '14px',
+                      lineHeight: '1.8',
+                      boxSizing: 'border-box',
+                      background: '#fff8fb',
+                      outline: 'none',
+                      resize: 'vertical',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#ff6b9d';
+                      e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#ffd6e7';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                ) : selectedSong.lyrics ? (
+                  <div style={{
+                    fontSize: '14px',
+                    lineHeight: '1.8',
+                    color: '#333',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {selectedSong.lyrics}
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '48px 20px',
+                    color: '#ff8fab',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '36px', opacity: 0.6 }}>🎶</div>
+                    <p style={{ fontSize: '14px', fontWeight: '500', margin: 0 }}>暂无歌词</p>
+                    {isAdmin && (
+                      <button
+                        onClick={() => { setLyricsText(''); setLyricsEditing(true); }}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '12px',
+                          border: '2px solid #ffd6e7',
+                          background: '#fff5f8',
+                          color: '#ff6b9d',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: 'bold',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#ffe8f0';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#fff5f8';
+                        }}
+                      >
+                        ✏️ 添加歌词
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {lyricsEditing && (
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  padding: '16px 24px',
+                  borderTop: '2px solid #ffd6e7',
+                  background: '#ffffff'
+                }}>
+                  <button
+                    onClick={() => { setLyricsText(selectedSong.lyrics || ''); setLyricsEditing(false); }}
+                    style={{
+                      flex: 1,
+                      background: '#fff5f8',
+                      color: '#ff6b9d',
+                      border: '2px solid #ffd6e7',
+                      padding: '12px 20px',
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#ffe8f0';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#fff5f8';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={saveLyrics}
+                    disabled={lyricsSaving}
+                    style={{
+                      flex: 1,
+                      background: lyricsSaving ? '#ffd6e7' : '#ff6b9d',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 20px',
+                      borderRadius: '16px',
+                      cursor: lyricsSaving ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      boxShadow: lyricsSaving ? 'none' : '0 4px 12px rgba(255, 107, 157, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!lyricsSaving) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 107, 157, 0.4)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = lyricsSaving ? 'none' : '0 4px 12px rgba(255, 107, 157, 0.3)';
+                    }}
+                  >
+                    {lyricsSaving ? '保存中... 💾' : '💾 保存歌词'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -2290,7 +2602,12 @@ export default function Home() {
                       fontSize: '20px',
                       color: '#ff6b9d',
                       fontWeight: 'bold',
-                      margin: 0
+                      margin: 0,
+                      flex: 1,
+                      minWidth: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
                     }}>{selectedSong.name}</h2>
                     {/* 主打歌标识 */}
                     <div style={{
@@ -2322,6 +2639,38 @@ export default function Home() {
                         {normalizeEnsembleType(selectedSong.ensembleType) === 'chorus' ? '合唱' : '对唱'}
                       </div>
                     )}
+                    {/* 歌词按钮 */}
+                    <button
+                      onClick={openLyricsModal}
+                      title={selectedSong.lyrics ? '查看/编辑歌词' : '添加歌词'}
+                      style={{
+                        marginLeft: 'auto',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '6px 12px',
+                        borderRadius: '12px',
+                        border: selectedSong.lyrics ? '2px solid #ff6b9d' : '2px solid #e6d3dc',
+                        background: selectedSong.lyrics ? '#fff0f5' : '#f7f0f3',
+                        color: selectedSong.lyrics ? '#ff6b9d' : '#c98fa3',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = selectedSong.lyrics ? '#ffe8f0' : '#f0e3e9';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = selectedSong.lyrics ? '#fff0f5' : '#f7f0f3';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      🎶 {selectedSong.lyrics ? '歌词' : '无歌词'}
+                    </button>
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>

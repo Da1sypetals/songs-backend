@@ -20,6 +20,7 @@ export interface Song {
   tags: string[];
   key: number | null;  // null = 未定调, 0 = 原调, >0 = 升调, <0 = 降调
   notes?: string;
+  lyrics?: string;
   featured?: boolean;
   ensembleType?: EnsembleType;
   hasAudio?: boolean;

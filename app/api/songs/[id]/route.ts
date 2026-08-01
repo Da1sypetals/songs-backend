@@ -88,6 +88,7 @@ export async function PUT(
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
       key: key === null ? null : (typeof key === 'number' ? key : 0),
       notes: notes?.trim() || undefined,
+      lyrics: existingSong.lyrics,
       featured: body.featured === true,
       ensembleType: normalizeEnsembleType(body.ensembleType),
       hasAudio: existingSong.hasAudio,
