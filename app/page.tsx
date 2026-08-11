@@ -714,6 +714,29 @@ export default function Home() {
           .main-layout { display: flex; gap: 16px; align-items: flex-start; }
           .left-panel { width: 64%; }
           .right-panel { width: 36%; position: sticky; top: 16px; }
+          .song-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+          }
+          .song-detail-title {
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+            overflow: hidden;
+            color: #ff6b9d;
+            font-size: 20px;
+            font-weight: bold;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .song-detail-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+          }
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -722,6 +745,21 @@ export default function Home() {
             .song-grid { grid-template-columns: 1fr; }
             .left-panel { width: 50%; }
             .right-panel { width: 50%; }
+            .song-detail-header {
+              align-items: flex-start;
+              flex-wrap: wrap;
+            }
+            .song-detail-title {
+              flex-basis: 100%;
+              overflow: visible;
+              overflow-wrap: anywhere;
+              text-overflow: clip;
+              white-space: normal;
+            }
+            .song-detail-actions {
+              flex-wrap: wrap;
+              width: 100%;
+            }
           }
         ` }} />
         {/* 登录弹窗 */}
@@ -2597,80 +2635,72 @@ export default function Home() {
                       🎲
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                    <h2 style={{
-                      fontSize: '20px',
-                      color: '#ff6b9d',
-                      fontWeight: 'bold',
-                      margin: 0,
-                      flex: 1,
-                      minWidth: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>{selectedSong.name}</h2>
-                    {/* 主打歌标识 */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: selectedSong.featured ? '4px 10px' : '4px 8px',
-                      backgroundColor: selectedSong.featured ? '#8b0000' : '#f0d0d0',
-                      color: selectedSong.featured ? 'white' : '#b87070',
-                      borderRadius: '10px',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }}>
-                      <span>{selectedSong.featured ? '⭐' : '☆'}</span>
-                      {selectedSong.featured && <span>featured</span>}
-                    </div>
-                    {/* 合唱类型标识 */}
-                    {normalizeEnsembleType(selectedSong.ensembleType) !== 'none' && (
+                  <div className="song-detail-header">
+                    <h2 className="song-detail-title">{selectedSong.name}</h2>
+                    <div className="song-detail-actions">
+                      {/* 主打歌标识 */}
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '4px 10px',
-                        backgroundColor: '#fda085',
-                        color: 'white',
+                        gap: '4px',
+                        padding: selectedSong.featured ? '4px 10px' : '4px 8px',
+                        backgroundColor: selectedSong.featured ? '#8b0000' : '#f0d0d0',
+                        color: selectedSong.featured ? 'white' : '#b87070',
                         borderRadius: '10px',
                         fontSize: '12px',
                         fontWeight: 'bold'
                       }}>
-                        {normalizeEnsembleType(selectedSong.ensembleType) === 'chorus' ? '合唱' : '对唱'}
+                        <span>{selectedSong.featured ? '⭐' : '☆'}</span>
+                        {selectedSong.featured && <span>featured</span>}
                       </div>
-                    )}
-                    {/* 歌词按钮 */}
-                    <button
-                      onClick={openLyricsModal}
-                      title={selectedSong.lyrics ? '查看/编辑歌词' : '添加歌词'}
-                      style={{
-                        marginLeft: 'auto',
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '6px 12px',
-                        borderRadius: '12px',
-                        border: selectedSong.lyrics ? '2px solid #ff6b9d' : '2px solid #e6d3dc',
-                        background: selectedSong.lyrics ? '#fff0f5' : '#f7f0f3',
-                        color: selectedSong.lyrics ? '#ff6b9d' : '#c98fa3',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = selectedSong.lyrics ? '#ffe8f0' : '#f0e3e9';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = selectedSong.lyrics ? '#fff0f5' : '#f7f0f3';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      🎶 {selectedSong.lyrics ? '歌词' : '无歌词'}
-                    </button>
+                      {/* 合唱类型标识 */}
+                      {normalizeEnsembleType(selectedSong.ensembleType) !== 'none' && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '4px 10px',
+                          backgroundColor: '#fda085',
+                          color: 'white',
+                          borderRadius: '10px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          {normalizeEnsembleType(selectedSong.ensembleType) === 'chorus' ? '合唱' : '对唱'}
+                        </div>
+                      )}
+                      {/* 歌词按钮 */}
+                      <button
+                        onClick={openLyricsModal}
+                        title={selectedSong.lyrics ? '查看/编辑歌词' : '添加歌词'}
+                        style={{
+                          marginLeft: 'auto',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '6px 12px',
+                          borderRadius: '12px',
+                          border: selectedSong.lyrics ? '2px solid #ff6b9d' : '2px solid #e6d3dc',
+                          background: selectedSong.lyrics ? '#fff0f5' : '#f7f0f3',
+                          color: selectedSong.lyrics ? '#ff6b9d' : '#c98fa3',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = selectedSong.lyrics ? '#ffe8f0' : '#f0e3e9';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = selectedSong.lyrics ? '#fff0f5' : '#f7f0f3';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        🎶 {selectedSong.lyrics ? '歌词' : '无歌词'}
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>
