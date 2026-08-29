@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useDeferredValue, useRef, Fragment } from 'react';
 import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
-import { matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
+import { matchPinyinArrayCost, matchPinyinCost, matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
 // 从环境变量读取密码，默认为 'daisy2024'
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_SONGLIST_PASSWORD?.trim() || 'daisy2024';
@@ -320,8 +320,17 @@ export default function Home() {
       return true;
     });
 
-    // 应用排序
-    return sortSongs(filtered);
+    // 先按歌手/歌名/key 排，再按匹配代价稳定排序，精确命中排在模糊命中之前
+    const scored = sortSongs(filtered).map(song => {
+      let cost = 0;
+      if (deferredName) cost += matchPinyinCost(deferredName, song.name);
+      if (deferredSinger) cost += matchPinyinArrayCost(deferredSinger, song.singers);
+      if (deferredTag) cost += matchPinyinArrayCost(deferredTag, song.tags);
+      return { song, cost };
+    });
+
+    scored.sort((a, b) => a.cost - b.cost);
+    return scored.map(item => item.song);
   }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
 
   // 清除所有搜索
@@ -1454,28 +1463,36 @@ export default function Home() {
               ))}
               <button
                 onClick={clearAllFilters}
+                title="清除搜索"
+                aria-label="清除搜索"
                 style={{
-                  background: '#fff5f8',
-                  color: '#ff6b9d',
-                  border: '2px solid #ffd6e7',
-                  padding: '6px 14px',
-                  borderRadius: '12px',
+                  width: '26px',
+                  height: '26px',
+                  flex: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#ffffff',
+                  color: '#e53935',
+                  border: '2px solid #e53935',
+                  borderRadius: '50%',
+                  padding: 0,
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
+                  lineHeight: 1,
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#ffe8f0';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.background = '#e53935';
+                  e.currentTarget.style.color = '#ffffff';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#fff5f8';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.color = '#e53935';
                 }}
               >
-                清除搜索
+                ✕
               </button>
             </div>
           )}
