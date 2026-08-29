@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useDeferredValue, useRef } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue, useRef, Fragment } from 'react';
 import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
 import { matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
@@ -333,6 +333,22 @@ export default function Home() {
     setShowAudioOnly(false);
     setEnsembleFilter(EMPTY_ENSEMBLE_FILTER);
   };
+
+  // 已生效的搜索条件，每种条件一张卡片，卡片之间是「与」，卡片内部多个取值是「或」
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: string; field: string; values: string[] }[] = [];
+    const name = searchName.trim();
+    const singer = searchSinger.trim();
+    const tag = searchTag.trim();
+    if (name) chips.push({ key: 'name', field: '歌名', values: [name] });
+    if (singer) chips.push({ key: 'singer', field: '歌手', values: [singer] });
+    if (tag) chips.push({ key: 'tag', field: '标签', values: [tag] });
+    if (showFeaturedOnly) chips.push({ key: 'featured', field: '', values: ['⭐ featured'] });
+    if (showAudioOnly) chips.push({ key: 'audio', field: '', values: ['🎧 仅带音频'] });
+    const ensembles = ENSEMBLE_OPTIONS.filter(option => ensembleFilter[option.value]).map(option => option.label);
+    if (ensembles.length) chips.push({ key: 'ensemble', field: '类型', values: ensembles });
+    return chips;
+  }, [searchName, searchSinger, searchTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
 
   const addSong = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1390,32 +1406,79 @@ export default function Home() {
             >
               🎧
             </button>
-            <button
-              onClick={clearAllFilters}
-              style={{
-                background: '#fff5f8',
-                color: '#ff6b9d',
-                border: '2px solid #ffd6e7',
-                padding: '10px 20px',
-                borderRadius: '16px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#ffe8f0';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#fff5f8';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              清除搜索
-            </button>
           </div>
+          {activeFilterChips.length > 0 && (
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              {activeFilterChips.map((chip, chipIndex) => (
+                <Fragment key={chip.key}>
+                  {chipIndex > 0 && (
+                    <span style={{
+                      color: '#ffb3c6',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}>
+                      与
+                    </span>
+                  )}
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    background: '#fff5f8',
+                    border: '2px solid #ffd6e7',
+                    borderRadius: '12px',
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    color: '#ff6b9d',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {chip.field && (
+                      <span style={{ opacity: 0.65, marginRight: '4px' }}>{chip.field}</span>
+                    )}
+                    {chip.values.map((value, valueIndex) => (
+                      <Fragment key={value}>
+                        {valueIndex > 0 && (
+                          <span style={{ opacity: 0.6, fontWeight: 'normal', margin: '0 4px' }}>或</span>
+                        )}
+                        <span>{value}</span>
+                      </Fragment>
+                    ))}
+                  </span>
+                </Fragment>
+              ))}
+              <button
+                onClick={clearAllFilters}
+                style={{
+                  background: '#fff5f8',
+                  color: '#ff6b9d',
+                  border: '2px solid #ffd6e7',
+                  padding: '6px 14px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ffe8f0';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#fff5f8';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                清除搜索
+              </button>
+            </div>
+          )}
           <div style={{
             color: '#ff8fab',
             fontSize: '14px',
