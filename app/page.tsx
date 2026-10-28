@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useDeferredValue, useRef, Fragment } from 'react';
+import { useState, useEffect, useMemo, useCallback, useDeferredValue, useRef, Fragment } from 'react';
 import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
 import { matchPinyinArrayCost, matchPinyinCost, matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
@@ -19,6 +19,9 @@ const EMPTY_ENSEMBLE_FILTER: Record<EnsembleType, boolean> = {
 };
 
 const MAX_AUDIO_DURATION_SECONDS = 150;
+
+// 双击 Escape 的判定窗口（毫秒）
+const DOUBLE_ESCAPE_INTERVAL_MS = 400;
 
 type AudioCacheEntry = {
   src: string;
@@ -334,14 +337,34 @@ export default function Home() {
   }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
 
   // 清除所有搜索
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setSearchName('');
     setSearchSinger('');
     setSearchTag('');
     setShowFeaturedOnly(false);
     setShowAudioOnly(false);
     setEnsembleFilter(EMPTY_ENSEMBLE_FILTER);
-  };
+  }, []);
+
+  // 页面内任意位置双击 Escape 清除所有搜索条件
+  const lastEscapeAtRef = useRef(0);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.repeat) return;
+
+      const now = Date.now();
+      if (now - lastEscapeAtRef.current <= DOUBLE_ESCAPE_INTERVAL_MS) {
+        lastEscapeAtRef.current = 0;
+        clearAllFilters();
+        return;
+      }
+      lastEscapeAtRef.current = now;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [clearAllFilters]);
 
   // 已生效的搜索条件，每种条件一张卡片，卡片之间是「与」，卡片内部多个取值是「或」
   const activeFilterChips = useMemo(() => {
@@ -2862,28 +2885,29 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ color: '#ff6b9d', fontSize: '13px', fontWeight: 'bold' }}>📝 备注</label>
-                    <div style={{
-                      marginTop: '8px',
-                      padding: '12px 16px',
-                      background: selectedSong.notes ? '#fff5f8' : '#f8f9fa',
-                      borderRadius: '14px',
-                      border: '2px solid ' + (selectedSong.notes ? '#ffd6e7' : '#e9ecef'),
-                      minHeight: selectedSong.notes ? 'auto' : '50px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      <span style={{
-                        fontSize: '14px',
-                        color: selectedSong.notes ? '#ff6b9d' : '#adb5bd',
-                        lineHeight: '1.5'
+                  {selectedSong.notes && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ color: '#ff6b9d', fontSize: '13px', fontWeight: 'bold' }}>📝 备注</label>
+                      <div style={{
+                        marginTop: '8px',
+                        padding: '12px 16px',
+                        background: '#fff5f8',
+                        borderRadius: '14px',
+                        border: '2px solid #ffd6e7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        transition: 'all 0.3s ease'
                       }}>
-                        {selectedSong.notes ? selectedSong.notes : '无备注~'}
-                      </span>
+                        <span style={{
+                          fontSize: '14px',
+                          color: '#ff6b9d',
+                          lineHeight: '1.5'
+                        }}>
+                          {selectedSong.notes}
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {selectedSong.hasAudio && (
                     <div style={{ marginBottom: '16px' }}>
