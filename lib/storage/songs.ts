@@ -188,7 +188,8 @@ export async function completeSong(shardId: string, song: StoredSong): Promise<v
   ]);
 }
 
-export async function cancelSong(shardId: string, song: StoredSong): Promise<void> {
+// 删除曲目及其全部分块，并把占用的配额退回去
+export async function removeSong(shardId: string, song: StoredSong): Promise<void> {
   await d1Batch(shardId, [
     { sql: 'DELETE FROM storage_chunk WHERE sha256 = ?', params: [song.sha256] },
     { sql: 'DELETE FROM storage_song WHERE sha256 = ?', params: [song.sha256] },
