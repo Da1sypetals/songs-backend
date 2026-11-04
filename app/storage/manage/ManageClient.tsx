@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 const ADMIN_KEY = 'isAdmin';
-const PASSWORD_KEY = 'storageManagePassword';
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_SONGLIST_PASSWORD?.trim() || 'daisy2024';
 
 const CHUNK_SIZE = 1_400_000;
@@ -285,7 +284,6 @@ export default function ManageClient() {
   const [search, setSearch] = useState('');
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [password, setPassword] = useState('');
   const [showLogin, setShowLogin] = useState(false);
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -323,9 +321,7 @@ export default function ManageClient() {
   }, [load]);
 
   useEffect(() => {
-    const saved = window.sessionStorage.getItem(PASSWORD_KEY);
-    if (saved !== null && saved === ADMIN_PASSWORD) {
-      setPassword(saved);
+    if (window.localStorage.getItem(ADMIN_KEY) === 'true') {
       setIsAdmin(true);
     }
   }, []);
@@ -345,8 +341,6 @@ export default function ManageClient() {
   const submitLogin = () => {
     if (loginPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
-      setPassword(loginPassword);
-      window.sessionStorage.setItem(PASSWORD_KEY, loginPassword);
       window.localStorage.setItem(ADMIN_KEY, 'true');
       setShowLogin(false);
       setLoginPassword('');
@@ -358,8 +352,6 @@ export default function ManageClient() {
 
   const logout = () => {
     setIsAdmin(false);
-    setPassword('');
-    window.sessionStorage.removeItem(PASSWORD_KEY);
     window.localStorage.removeItem(ADMIN_KEY);
     setTasks([]);
     setPendingDelete(null);
@@ -421,7 +413,7 @@ export default function ManageClient() {
         byteSize: task.file.size,
         sha256
       },
-      password,
+      ADMIN_PASSWORD,
       signal
     );
 
@@ -451,14 +443,14 @@ export default function ManageClient() {
         'PUT',
         `/storage/upload/${sha256}/${index}`,
         { data: toBase64(slice), chunkSha256 },
-        password,
+        ADMIN_PASSWORD,
         signal
       );
       updateTask(task.id, { progress: Math.round(((index + 1) / total) * 100) });
     }
 
     updateTask(task.id, { message: '正在收尾' });
-    await api('POST', `/storage/upload/${sha256}/complete`, {}, password, signal);
+    await api('POST', `/storage/upload/${sha256}/complete`, {}, ADMIN_PASSWORD, signal);
     pendingSha.current = null;
     updateTask(task.id, { phase: 'done', progress: 100, message: '已上传' });
   };
@@ -510,7 +502,7 @@ export default function ManageClient() {
     const sha256 = pendingSha.current;
     if (sha256 === null || !isAdmin) return;
     pendingSha.current = null;
-    void api('DELETE', `/storage/upload/${sha256}`, undefined, password, new AbortController().signal).catch(
+    void api('DELETE', `/storage/upload/${sha256}`, undefined, ADMIN_PASSWORD, new AbortController().signal).catch(
       (error: unknown) => setToast(describe(error))
     );
   };
@@ -529,7 +521,7 @@ export default function ManageClient() {
     }
     setDeleting(true);
     try {
-      await api('DELETE', `/storage/upload/${song.sha256}`, undefined, password, new AbortController().signal);
+      await api('DELETE', `/storage/upload/${song.sha256}`, undefined, ADMIN_PASSWORD, new AbortController().signal);
       setPendingDelete(null);
       setToast(`已删除《${song.name}》`);
       await load();
