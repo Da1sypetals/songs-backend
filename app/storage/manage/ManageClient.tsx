@@ -162,6 +162,9 @@ async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { cache: 'no-store', ...init });
   const type = response.headers.get('content-type') ?? '';
   if (!type.includes('application/json')) {
+    if (response.status === 403 || response.status === 429) {
+      throw new Error('访问被 Vercel 的安全校验拦下了，刷新页面后重试');
+    }
     throw new Error(`服务器返回了 ${type || '未知类型'}（HTTP ${response.status}）`);
   }
   const payload = (await response.json()) as { success: boolean; error?: string; data?: T };
