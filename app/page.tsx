@@ -934,7 +934,7 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#fff5f8'
+      background: '#fffafd'
     }}>
       <main style={{
         maxWidth: '1400px',
@@ -2544,7 +2544,7 @@ export default function Home() {
                 <form
                   onSubmit={saveEdit}
                   style={{
-                    background: '#ffffff',
+                    background: '#fff0f1',
                     padding: '20px',
                     borderRadius: '20px',
                     boxShadow: '0 2px 16px rgba(255, 107, 157, 0.12)',
@@ -3099,13 +3099,13 @@ export default function Home() {
               ) : (
                 // 查看模式
                 <div style={{
-                  background: isRandomPick ? '#fffef5' : '#ffffff',
+                  background: isRandomPick ? '#fffef5' : '#fff0f1',
                   padding: '20px',
                   borderRadius: '20px',
                   boxShadow: isRandomPick
                     ? '0 2px 20px rgba(218, 165, 32, 0.18)'
                     : '0 2px 16px rgba(255, 107, 157, 0.12)',
-                  border: isRandomPick ? '2px solid rgb(194, 146, 26)' : '2px solid #ffd6e7',
+                  border: isRandomPick ? '2px solidrgb(194, 146, 26)' : '2px solid #ffd6e7',
                   position: 'relative'
                 }}>
                   {selectedSong.pinned && <PinnedCornerPin size={26} offset={-12} />}
@@ -3465,7 +3465,7 @@ export default function Home() {
               )
             ) : (
               <div style={{
-                background: '#fff5f8',
+                background: '#fff0f1',
                 padding: '40px 30px',
                 borderRadius: '20px',
                 textAlign: 'center',
