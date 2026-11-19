@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useDeferredValue, useRef, Fragment } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useDeferredValue, useRef, Fragment, type CSSProperties } from 'react';
 import { CreateSongRequest, EnsembleType, Song } from '@/types/song';
 import { matchPinyinArrayCost, matchPinyinCost, matchesPinyin, matchesPinyinArray, preloadPinyinCache } from '@/lib/pinyin-search';
 
@@ -74,12 +74,67 @@ function getEnsembleIcon(value: Song['ensembleType']) {
 function EnsembleTypeControl({
   value,
   onChange,
-  compact = false
+  compact = false,
+  grouped = false
 }: {
   value: EnsembleType;
   onChange: (value: EnsembleType) => void;
   compact?: boolean;
+  grouped?: boolean;
 }) {
+  if (grouped) {
+    return (
+      <div
+        data-testid="edit-ensemble-group"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          width: '100%',
+          height: '40px',
+          boxSizing: 'border-box',
+          background: '#fff5f8',
+          border: '2px solid #ffd6e7',
+          borderRadius: '14px',
+          padding: '0 5px'
+        }}
+      >
+        {ENSEMBLE_OPTIONS.map((option) => {
+          const selected = value === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(option.value)}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '28px',
+                lineHeight: 1,
+                background: selected ? '#ff6b9d' : '#ffffff',
+                color: selected ? 'white' : '#ff8fab',
+                border: selected ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                padding: '0 6px',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                opacity: selected ? 1 : 0.6,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div style={{
       display: 'flex',
@@ -114,12 +169,93 @@ function EnsembleTypeControl({
   );
 }
 
+// Iconify andrsrxn:pin 图标
+function PinIcon({ size = 16, style }: { size?: number; style?: CSSProperties }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      style={{ display: 'block', flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      <g fill="none">
+        <path
+          fill="currentColor"
+          d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7z"
+          opacity=".2"
+        />
+        <path
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.5"
+          d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7zM1.8 22.2l5.97-5.96"
+        />
+      </g>
+    </svg>
+  );
+}
+
+// Iconify andrsrxn:pin-off 图标
+function PinOffIcon({ size = 16, style }: { size?: number; style?: CSSProperties }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      style={{ display: 'block', flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      <g fill="none">
+        <path
+          fill="currentColor"
+          d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7z"
+          opacity=".2"
+        />
+        <path
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.5"
+          d="m2.7 2.7l18.6 18.6M7.62 7.74l-.18.07c-2.7.94-4.04 1.42-4.29 2.5c-.24 1.07.76 2.08 2.78 4.1l3.64 3.64c1.94 1.94 2.91 2.9 3.97 2.69c1.05-.22 1.56-1.49 2.58-4.03l.16-.4M1.8 22.2l5.97-5.96m2.8-9.6l2.16-.77l.21-.08a2 2 0 0 0 1.22-1.58l.02-.23c.02-.34.04-.51.06-.62a2 2 0 0 1 3.22-1.2l.44.44l3.43 3.42c.33.34.5.5.6.63a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.36l-.9 2.25"
+        />
+      </g>
+    </svg>
+  );
+}
+
+// 卡片左上角斜插图钉装饰（一半在卡片外，一半在卡片内）
+function PinnedCornerPin({ size = 22, offset = -10 }: { size?: number; offset?: number }) {
+  return (
+    <div
+      data-testid="pinned-corner-pin"
+      style={{
+        position: 'absolute',
+        top: `${offset}px`,
+        left: `${offset}px`,
+        color: '#d95d39',
+        pointerEvents: 'none',
+        zIndex: 2,
+        filter: 'drop-shadow(0 2px 3px rgba(217, 93, 57, 0.35))'
+      }}
+    >
+      <PinIcon size={size} style={{ transform: 'scaleX(-1)' }} />
+    </div>
+  );
+}
+
 /**
  * 对歌曲列表进行排序
- * 排序优先级：歌手名 > 歌曲名 > key绝对值
+ * 排序优先级：pinned > 歌手名 > 歌曲名 > key绝对值
  */
 function sortSongs(songs: Song[]): Song[] {
   return [...songs].sort((a, b) => {
+    const pinnedDiff = (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+    if (pinnedDiff !== 0) return pinnedDiff;
+
     // 1. 按第一个歌手名排序（字母顺序）
     const singerA = a.singers[0] || '';
     const singerB = b.singers[0] || '';
@@ -150,12 +286,16 @@ export default function Home() {
   const [key, setKey] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [pinned, setPinned] = useState(false);
   const [ensembleType, setEnsembleType] = useState<EnsembleType>('none');
 
-  // 搜索框状态
+  // 搜索框状态与 DOM 引用（保留 hydration 之前用户已输入的内容）
   const [searchName, setSearchName] = useState('');
   const [searchSinger, setSearchSinger] = useState('');
   const [searchTag, setSearchTag] = useState('');
+  const searchNameInputRef = useRef<HTMLInputElement>(null);
+  const searchSingerInputRef = useRef<HTMLInputElement>(null);
+  const searchTagInputRef = useRef<HTMLInputElement>(null);
 
   // 拼音搜索：使用 useDeferredValue 保持输入框即时响应
   const deferredName   = useDeferredValue(searchName);
@@ -164,6 +304,9 @@ export default function Home() {
 
   // 主打歌筛选状态
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+
+  // 置顶歌曲筛选状态
+  const [showPinnedOnly, setShowPinnedOnly] = useState(false);
 
   // 仅显示带音频的歌曲筛选状态（默认关闭）
   const [showAudioOnly, setShowAudioOnly] = useState(false);
@@ -178,6 +321,7 @@ export default function Home() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isRandomPick, setIsRandomPick] = useState(false);
+  const [pinningSongId, setPinningSongId] = useState<string | null>(null);
 
   // 编辑表单状态
   const [editName, setEditName] = useState('');
@@ -186,6 +330,7 @@ export default function Home() {
   const [editKey, setEditKey] = useState<number | null>(null);
   const [editNotes, setEditNotes] = useState('');
   const [editFeatured, setEditFeatured] = useState(false);
+  const [editPinned, setEditPinned] = useState(false);
   const [editEnsembleType, setEditEnsembleType] = useState<EnsembleType>('none');
 
   // 音频编辑状态
@@ -273,6 +418,16 @@ export default function Home() {
     }
   };
 
+  // 挂载时同步用户在 hydration 完成前已输入到搜索框的内容
+  useLayoutEffect(() => {
+    const initialName = searchNameInputRef.current?.value ?? '';
+    const initialSinger = searchSingerInputRef.current?.value ?? '';
+    const initialTag = searchTagInputRef.current?.value ?? '';
+    if (initialName) setSearchName(initialName);
+    if (initialSinger) setSearchSinger(initialSinger);
+    if (initialTag) setSearchTag(initialTag);
+  }, []);
+
   // 数据加载后预热拼音缓存，确保首次搜索时无延迟
   useEffect(() => {
     if (!songs.length) return;
@@ -282,7 +437,8 @@ export default function Home() {
       s.singers.forEach(x => texts.add(x));
       s.tags.forEach(x => texts.add(x));
     });
-    queueMicrotask(() => preloadPinyinCache(Array.from(texts)));
+    const timer = window.setTimeout(() => preloadPinyinCache(Array.from(texts)), 0);
+    return () => window.clearTimeout(timer);
   }, [songs]);
 
   // 过滤并排序歌曲（支持拼音搜索）
@@ -292,6 +448,11 @@ export default function Home() {
     const filtered = songs.filter(song => {
       // 主打歌筛选
       if (showFeaturedOnly && !song.featured) {
+        return false;
+      }
+
+      // 置顶歌曲筛选
+      if (showPinnedOnly && !song.pinned) {
         return false;
       }
 
@@ -323,7 +484,7 @@ export default function Home() {
       return true;
     });
 
-    // 先按歌手/歌名/key 排，再按匹配代价稳定排序，精确命中排在模糊命中之前
+    // 先按 pinned/歌手/歌名/key 排，再按匹配代价稳定排序，精确命中排在模糊命中之前
     const scored = sortSongs(filtered).map(song => {
       let cost = 0;
       if (deferredName) cost += matchPinyinCost(deferredName, song.name);
@@ -334,14 +495,18 @@ export default function Home() {
 
     scored.sort((a, b) => a.cost - b.cost);
     return scored.map(item => item.song);
-  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
+  }, [songs, deferredName, deferredSinger, deferredTag, showFeaturedOnly, showPinnedOnly, showAudioOnly, ensembleFilter]);
 
   // 清除所有搜索
   const clearAllFilters = useCallback(() => {
+    if (searchNameInputRef.current) searchNameInputRef.current.value = '';
+    if (searchSingerInputRef.current) searchSingerInputRef.current.value = '';
+    if (searchTagInputRef.current) searchTagInputRef.current.value = '';
     setSearchName('');
     setSearchSinger('');
     setSearchTag('');
     setShowFeaturedOnly(false);
+    setShowPinnedOnly(false);
     setShowAudioOnly(false);
     setEnsembleFilter(EMPTY_ENSEMBLE_FILTER);
   }, []);
@@ -376,11 +541,12 @@ export default function Home() {
     if (singer) chips.push({ key: 'singer', field: '歌手', values: [singer] });
     if (tag) chips.push({ key: 'tag', field: '标签', values: [tag] });
     if (showFeaturedOnly) chips.push({ key: 'featured', field: '', values: ['⭐ featured'] });
+    if (showPinnedOnly) chips.push({ key: 'pinned', field: '', values: ['pinned'] });
     if (showAudioOnly) chips.push({ key: 'audio', field: '', values: ['🎧 仅带音频'] });
     const ensembles = ENSEMBLE_OPTIONS.filter(option => ensembleFilter[option.value]).map(option => option.label);
     if (ensembles.length) chips.push({ key: 'ensemble', field: '类型', values: ensembles });
     return chips;
-  }, [searchName, searchSinger, searchTag, showFeaturedOnly, showAudioOnly, ensembleFilter]);
+  }, [searchName, searchSinger, searchTag, showFeaturedOnly, showPinnedOnly, showAudioOnly, ensembleFilter]);
 
   const addSong = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -401,6 +567,7 @@ export default function Home() {
         key,
         notes: notes.trim() || undefined,
         featured,
+        pinned,
         ensembleType
       };
 
@@ -418,6 +585,7 @@ export default function Home() {
         setKey(0);
         setNotes('');
         setFeatured(false);
+        setPinned(false);
         setEnsembleType('none');
         setShowForm(false);
         fetchSongs(true);
@@ -429,6 +597,33 @@ export default function Home() {
       alert('添加失败');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 一键切换歌曲 pin 状态
+  const togglePinSong = async (song: Song) => {
+    if (!isAdmin || pinningSongId === song.id) return;
+    const nextPinned = !song.pinned;
+    setPinningSongId(song.id);
+    try {
+      const response = await fetch(`/api/songs/${song.id}/pin`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinned: nextPinned })
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || '更新置顶状态失败');
+        return;
+      }
+      const updatedSong: Song = data.data;
+      setSongs(prev => prev.map(s => s.id === updatedSong.id ? updatedSong : s));
+      setSelectedSong(prev => prev?.id === updatedSong.id ? updatedSong : prev);
+    } catch (error) {
+      console.error('更新置顶状态失败:', error);
+      alert('更新置顶状态失败');
+    } finally {
+      setPinningSongId(null);
     }
   };
 
@@ -469,6 +664,7 @@ export default function Home() {
     setEditKey(selectedSong.key);
     setEditNotes(selectedSong.notes || '');
     setEditFeatured(selectedSong.featured || false);
+    setEditPinned(selectedSong.pinned || false);
     setEditEnsembleType(normalizeEnsembleType(selectedSong.ensembleType));
     setEditAudioFile(null);
     setEditAudioDuration(null);
@@ -550,6 +746,7 @@ export default function Home() {
           key: editKey,
           notes: editNotes.trim() || undefined,
           featured: editFeatured,
+          pinned: editPinned,
           ensembleType: editEnsembleType
         })
       });
@@ -723,15 +920,14 @@ export default function Home() {
   }, [selectedSong?.id, selectedSong?.hasAudio, selectedSong?.audioMeta?.updatedAt, isEditing]);
 
   // 搜索框样式 - 浅粉色主题
-  const searchInputStyle = {
+  const searchInputStyle: CSSProperties = {
     padding: '12px 16px',
     borderRadius: '20px',
     border: '2px solid #ffd6e7',
     fontSize: '14px',
-    flex: 1,
-    minWidth: '150px',
     background: '#fff8fb',
     outline: 'none',
+    boxSizing: 'border-box',
     transition: 'all 0.3s ease'
   };
 
@@ -747,6 +943,56 @@ export default function Home() {
         minHeight: '100vh'
       }}>
         <style dangerouslySetInnerHTML={{ __html: `
+          .main-layout {
+            display: grid;
+            grid-template-columns: calc((100% - 16px) * 0.64) minmax(0, 1fr);
+            grid-template-rows: auto 1fr;
+            column-gap: 16px;
+            align-items: start;
+          }
+          .top-left-panel {
+            grid-column: 1;
+            grid-row: 1;
+            min-width: 0;
+          }
+          .left-panel {
+            grid-column: 1;
+            grid-row: 2;
+            min-width: 0;
+          }
+          .right-panel {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            min-width: 0;
+            position: sticky;
+            top: 16px;
+          }
+          .search-panel {
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .search-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+          }
+          .search-inputs-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+          }
+          .search-filters-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+          }
+          .search-input {
+            flex: 1;
+            min-width: 0;
+          }
           .song-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -759,9 +1005,6 @@ export default function Home() {
             gap: 10px;
             min-width: 0;
           }
-          .main-layout { display: flex; gap: 16px; align-items: flex-start; }
-          .left-panel { width: 64%; }
-          .right-panel { width: 36%; position: sticky; top: 16px; }
           .song-detail-header {
             display: flex;
             align-items: center;
@@ -790,9 +1033,51 @@ export default function Home() {
             100% { transform: rotate(360deg); }
           }
           @media (max-width: 768px) {
+            .main-layout {
+              grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+              column-gap: 16px;
+            }
+            .top-left-panel {
+              grid-column: 1 / 3;
+              grid-row: 1;
+            }
+            .left-panel {
+              grid-column: 1;
+              grid-row: 2;
+            }
+            .right-panel {
+              grid-column: 2;
+              grid-row: 2;
+              position: static;
+            }
+            .search-controls {
+              flex-direction: row;
+              flex-wrap: wrap;
+              gap: 8px;
+              align-items: center;
+            }
+            .search-inputs-row,
+            .search-filters-row {
+              display: contents;
+            }
+            .search-input {
+              min-width: 150px;
+            }
             .song-grid { grid-template-columns: 1fr; }
-            .left-panel { width: 50%; }
-            .right-panel { width: 50%; }
+            .detail-bottom-actions {
+              gap: 6px !important;
+            }
+            .detail-icon-btn {
+              width: 36px !important;
+              height: 36px !important;
+              border-radius: 10px !important;
+            }
+            .detail-edit-btn {
+              padding: 8px 10px !important;
+              font-size: 13px !important;
+              white-space: nowrap;
+              border-radius: 12px !important;
+            }
             .song-detail-header {
               align-items: flex-start;
               flex-wrap: wrap;
@@ -1280,164 +1565,202 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 搜索区域 */}
-        <div style={{
-          background: '#ffffff',
-          padding: '16px',
-          borderRadius: '16px',
-          marginBottom: '16px',
-          boxShadow: '0 2px 12px rgba(255, 107, 157, 0.08)',
-          border: '2px solid #ffd6e7'
-        }}>
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            marginBottom: '12px'
-          }}>
-            <input
-              type="text"
-              placeholder="🔍 搜索歌名（支持拼音）..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              style={searchInputStyle}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#ff6b9d';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#ffd6e7';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-            <input
-              type="text"
-              placeholder="🎤 搜索歌手（支持拼音）..."
-              value={searchSinger}
-              onChange={(e) => setSearchSinger(e.target.value)}
-              style={searchInputStyle}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#ff6b9d';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#ffd6e7';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-            <input
-              type="text"
-              placeholder="🏷️ 搜索标签（支持拼音）..."
-              value={searchTag}
-              onChange={(e) => setSearchTag(e.target.value)}
-              style={searchInputStyle}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#ff6b9d';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#ffd6e7';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-            <button
-              onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
+        <div className="main-layout">
+          <div className="top-left-panel">
+            {/* 搜索区域 */}
+            <div
+              className="search-panel"
               style={{
-                background: showFeaturedOnly
-                  ? '#8b0000'
-                  : '#ffe4e1',
-                color: showFeaturedOnly ? 'white' : '#8b0000',
-                border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
-                padding: '10px 20px',
+                background: '#ffffff',
+                padding: '16px',
                 borderRadius: '16px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
+                marginBottom: '16px',
+                boxShadow: '0 2px 12px rgba(255, 107, 157, 0.08)',
+                border: '2px solid #ffd6e7'
               }}
             >
-              {showFeaturedOnly ? '⭐ featured' : '☆ featured'}
-            </button>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              alignSelf: 'stretch',
-              gap: '4px',
-              marginLeft: 'auto',
-              background: '#fff5f8',
-              border: '2px solid #ffd6e7',
-              borderRadius: '16px',
-              padding: '0 8px'
-            }}>
-              {ENSEMBLE_OPTIONS.map((option) => {
-                  const active = ensembleFilter[option.value];
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => toggleEnsembleFilter(option.value)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '28px',
-                        lineHeight: 1,
-                        background: active ? '#ff6b9d' : '#ffffff',
-                        color: active ? 'white' : '#ff8fab',
-                        border: active ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
-                        padding: '0 10px',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        opacity: active ? 1 : 0.6,
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
+          <div className="search-controls">
+            <div className="search-inputs-row">
+              <input
+                ref={searchNameInputRef}
+                type="text"
+                className="search-input"
+                placeholder="🔍 搜索歌名（支持拼音）..."
+                defaultValue=""
+                onChange={(e) => setSearchName(e.target.value)}
+                style={searchInputStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              <input
+                ref={searchSingerInputRef}
+                type="text"
+                className="search-input"
+                placeholder="🎤 搜索歌手（支持拼音）..."
+                defaultValue=""
+                onChange={(e) => setSearchSinger(e.target.value)}
+                style={searchInputStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              <input
+                ref={searchTagInputRef}
+                type="text"
+                className="search-input"
+                placeholder="🏷️ 搜索标签（支持拼音）..."
+                defaultValue=""
+                onChange={(e) => setSearchTag(e.target.value)}
+                style={searchInputStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#ff6b9d';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(255, 107, 157, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#ffd6e7';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
             </div>
-            <button
-              onClick={() => setShowAudioOnly(!showAudioOnly)}
-              title="只显示带音频的歌曲"
-              style={{
-                background: showAudioOnly ? '#ff6b9d' : '#fff5f8',
-                color: showAudioOnly ? 'white' : '#ff6b9d',
-                border: showAudioOnly ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
-                padding: '10px 16px',
+            <div className="search-filters-row">
+              <button
+                type="button"
+                onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
+                style={{
+                  background: showFeaturedOnly
+                    ? '#8b0000'
+                    : '#ffe4e1',
+                  color: showFeaturedOnly ? 'white' : '#8b0000',
+                  border: showFeaturedOnly ? '2px solid #8b0000' : '2px solid #ffc0cb',
+                  padding: '10px 20px',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                {showFeaturedOnly ? '⭐ featured' : '☆ featured'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPinnedOnly(!showPinnedOnly)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: showPinnedOnly ? '#d95d39' : '#fff3ed',
+                  color: showPinnedOnly ? 'white' : '#d95d39',
+                  border: showPinnedOnly ? '2px solid #d95d39' : '2px solid #ffd0be',
+                  padding: '10px 18px',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <PinIcon size={15} />
+                <span>pinned</span>
+              </button>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                alignSelf: 'stretch',
+                gap: '4px',
+                background: '#fff5f8',
+                border: '2px solid #ffd6e7',
                 borderRadius: '16px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              🎧
-            </button>
+                padding: '0 8px'
+              }}>
+                {ENSEMBLE_OPTIONS.map((option) => {
+                    const active = ensembleFilter[option.value];
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => toggleEnsembleFilter(option.value)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '28px',
+                          lineHeight: 1,
+                          background: active ? '#ff6b9d' : '#ffffff',
+                          color: active ? 'white' : '#ff8fab',
+                          border: active ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                          padding: '0 10px',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          opacity: active ? 1 : 0.6,
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAudioOnly(!showAudioOnly)}
+                title="只显示带音频的歌曲"
+                style={{
+                  background: showAudioOnly ? '#ff6b9d' : '#fff5f8',
+                  color: showAudioOnly ? 'white' : '#ff6b9d',
+                  border: showAudioOnly ? '2px solid #ff6b9d' : '2px solid #ffd6e7',
+                  padding: '10px 16px',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                🎧
+              </button>
+            </div>
           </div>
           {activeFilterChips.length > 0 && (
             <div style={{
@@ -1478,7 +1801,14 @@ export default function Home() {
                         {valueIndex > 0 && (
                           <span style={{ opacity: 0.6, fontWeight: 'normal', margin: '0 4px' }}>或</span>
                         )}
-                        <span>{value}</span>
+                        {chip.key === 'pinned' ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <PinIcon size={13} />
+                            <span>{value}</span>
+                          </span>
+                        ) : (
+                          <span>{value}</span>
+                        )}
                       </Fragment>
                     ))}
                   </span>
@@ -1592,8 +1922,8 @@ export default function Home() {
             🎲 随机一首
           </button>
         </div>
+          </div>
 
-        <div className="main-layout">
           {/* 左侧：歌曲列表 + 新增表单 */}
           <div className="left-panel">
             {/* 新增表单（在showForm时显示在列表上方） */}
@@ -1909,7 +2239,7 @@ export default function Home() {
                       }}
                     />
                   </div>
-                  <div style={{ flex: 'none' }}>
+                  <div style={{ flex: 'none', display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <label style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1938,6 +2268,29 @@ export default function Home() {
                       />
                       <span>⭐ featured</span>
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setPinned(!pinned)}
+                      title={pinned ? '取消置顶 (Unpin)' : '置顶 (Pin)'}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: 'bold',
+                        color: pinned ? '#ffffff' : '#d95d39',
+                        cursor: 'pointer',
+                        padding: '10px 12px',
+                        background: pinned ? '#d95d39' : '#fff3ed',
+                        borderRadius: '10px',
+                        border: pinned ? '2px solid #d95d39' : '2px solid #ffd0be',
+                        transition: 'all 0.2s ease',
+                        fontSize: '13px',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {pinned ? <PinOffIcon size={16} /> : <PinIcon size={16} />}
+                      <span>{pinned ? 'unpin' : 'pin'}</span>
+                    </button>
                   </div>
                 </div>
 
@@ -2015,6 +2368,8 @@ export default function Home() {
                     }
                   }}
                 >
+                  {/* 置顶图钉 - 左上角斜插，一半在卡片内一半在卡片外 */}
+                  {song.pinned && <PinnedCornerPin size={22} offset={-10} />}
                   {/* 音频标识 - 位于右上角，featured 左侧 */}
                   {song.hasAudio && (
                     <div style={{
@@ -2438,51 +2793,84 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', marginBottom: '16px' }}>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ marginBottom: '20px' }}>
                     <label style={{
                       display: 'block',
                       marginBottom: '10px',
                       fontWeight: 'bold',
                       color: '#ff6b9d'
                     }}>
-                      👥 合唱类型
+                      📋 信息
                     </label>
-                    <EnsembleTypeControl
-                      value={editEnsembleType}
-                      onChange={setEditEnsembleType}
-                      compact
-                    />
-                  </div>
-
-                  <div style={{ flex: 1 }}>
-                    <label style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      fontWeight: 'bold',
-                      color: '#8b0000',
-                      cursor: 'pointer',
-                      padding: '10px 14px',
-                      background: editFeatured ? '#ffe4e1' : '#fff5f8',
-                      borderRadius: '14px',
-                      border: editFeatured ? '2px solid #8b0000' : '2px solid #ffd6e7',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={editFeatured}
-                        onChange={(e) => setEditFeatured(e.target.checked)}
-                        style={{
-                          width: '18px',
-                          height: '18px',
-                          cursor: 'pointer',
-                          accentColor: '#8b0000'
-                        }}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '8px', alignItems: 'center' }}>
+                      <EnsembleTypeControl
+                        value={editEnsembleType}
+                        onChange={setEditEnsembleType}
+                        grouped
                       />
-                      <span>⭐ featured</span>
-                    </label>
-                  </div>
+                      <div
+                        data-testid="edit-flags-group"
+                        style={{ display: 'flex', gap: '6px', alignItems: 'center', width: '100%', minWidth: 0 }}
+                      >
+                        <button
+                          type="button"
+                          data-testid="edit-featured-button"
+                          onClick={() => setEditFeatured(!editFeatured)}
+                          style={{
+                            flex: 1,
+                            minWidth: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            fontWeight: 'bold',
+                            color: editFeatured ? '#ffffff' : '#8b0000',
+                            cursor: 'pointer',
+                            height: '40px',
+                            padding: '0 6px',
+                            boxSizing: 'border-box',
+                            background: editFeatured ? '#8b0000' : '#ffe4e1',
+                            borderRadius: '14px',
+                            border: editFeatured ? '2px solid #8b0000' : '2px solid #ffc0cb',
+                            transition: 'all 0.2s ease',
+                            fontSize: '13px',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <span>{editFeatured ? '⭐ featured' : '☆ featured'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="edit-pin-button"
+                          onClick={() => setEditPinned(!editPinned)}
+                          title={editPinned ? '取消置顶 (Unpin)' : '置顶 (Pin)'}
+                          aria-label={editPinned ? '取消置顶' : '置顶'}
+                          style={{
+                            flex: 1,
+                            minWidth: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            fontWeight: 'bold',
+                            color: editPinned ? '#ffffff' : '#d95d39',
+                            cursor: 'pointer',
+                            height: '40px',
+                            padding: '0 6px',
+                            boxSizing: 'border-box',
+                            background: editPinned ? '#d95d39' : '#fff3ed',
+                            borderRadius: '14px',
+                            border: editPinned ? '2px solid #d95d39' : '2px solid #ffd0be',
+                            fontSize: '13px',
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {editPinned ? <PinOffIcon size={15} /> : <PinIcon size={15} />}
+                          <span>{editPinned ? 'unpin' : 'pin'}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '20px' }}>
@@ -2603,12 +2991,13 @@ export default function Home() {
                       onDrop={handleEditAudioDrop}
                       style={{
                         display: 'flex',
-                        flexDirection: 'column',
+                        flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '6px',
+                        flexWrap: 'wrap',
+                        gap: '8px',
                         width: '100%',
-                        padding: '22px 16px',
+                        padding: '12px 14px',
                         borderRadius: '16px',
                         border: `2px dashed ${editAudioDragging ? '#ff6b9d' : '#ffd6e7'}`,
                         background: editAudioDragging ? '#ffe8f0' : '#fff8fb',
@@ -2624,7 +3013,7 @@ export default function Home() {
                         onChange={handleEditAudioChange}
                         style={{ display: 'none' }}
                       />
-                      <span style={{ fontSize: '26px', lineHeight: 1 }}>{editAudioFile ? '🎵' : '🎧'}</span>
+                      <span style={{ fontSize: '18px', lineHeight: 1, flexShrink: 0 }}>{editAudioFile ? '🎵' : '🎧'}</span>
                       {editAudioFile ? (
                         <span style={{ fontSize: '13px', color: '#ff6b9d', fontWeight: 'bold', wordBreak: 'break-all' }}>
                           {editAudioFile.name}
@@ -2632,10 +3021,10 @@ export default function Home() {
                         </span>
                       ) : (
                         <>
-                          <span style={{ fontSize: '14px', color: '#ff6b9d', fontWeight: 'bold' }}>
+                          <span style={{ fontSize: '13px', color: '#ff6b9d', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                             点击选择或拖拽 MP3 到此处
                           </span>
-                          <span style={{ fontSize: '12px', color: '#ff8fab' }}>
+                          <span style={{ fontSize: '12px', color: '#ff8fab', whiteSpace: 'nowrap' }}>
                             仅支持 MP3，时长 ≤ {MAX_AUDIO_DURATION_SECONDS} 秒
                           </span>
                         </>
@@ -2716,9 +3105,10 @@ export default function Home() {
                   boxShadow: isRandomPick
                     ? '0 2px 20px rgba(218, 165, 32, 0.18)'
                     : '0 2px 16px rgba(255, 107, 157, 0.12)',
-                  border: isRandomPick ? '2px solidrgb(194, 146, 26)' : '2px solid #ffd6e7',
+                  border: isRandomPick ? '2px solid rgb(194, 146, 26)' : '2px solid #ffd6e7',
                   position: 'relative'
                 }}>
+                  {selectedSong.pinned && <PinnedCornerPin size={26} offset={-12} />}
                   {isRandomPick && (
                     <div style={{
                       position: 'absolute',
@@ -2959,8 +3349,46 @@ export default function Home() {
                   </div>
 
                   {isAdmin ? (
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className="detail-bottom-actions" style={{ display: 'flex', gap: '10px' }}>
                       <button
+                        type="button"
+                        className="detail-icon-btn"
+                        data-testid="detail-pin-button"
+                        disabled={pinningSongId === selectedSong.id}
+                        onClick={() => togglePinSong(selectedSong)}
+                        title={selectedSong.pinned ? '取消置顶 (Unpin)' : '置顶 (Pin)'}
+                        aria-label={selectedSong.pinned ? '取消置顶' : '置顶'}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          background: selectedSong.pinned ? '#d95d39' : '#fff3ed',
+                          color: selectedSong.pinned ? '#ffffff' : '#d95d39',
+                          border: selectedSong.pinned ? '2px solid #d95d39' : '2px solid #ffd0be',
+                          borderRadius: '12px',
+                          cursor: pinningSongId === selectedSong.id ? 'wait' : 'pointer',
+                          opacity: pinningSongId === selectedSong.id ? 0.65 : 1,
+                          boxShadow: selectedSong.pinned
+                            ? '0 4px 12px rgba(217, 93, 57, 0.3)'
+                            : '0 2px 8px rgba(217, 93, 57, 0.12)',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                        onMouseEnter={(e) => {
+                          if (pinningSongId !== selectedSong.id) {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {selectedSong.pinned ? <PinOffIcon size={20} /> : <PinIcon size={20} />}
+                      </button>
+                      <button
+                        className="detail-edit-btn"
                         onClick={startEdit}
                         style={{
                           flex: 1,
@@ -2987,6 +3415,7 @@ export default function Home() {
                         编辑 ✏️
                       </button>
                       <button
+                        className="detail-icon-btn"
                         onClick={() => removeSong(selectedSong.id)}
                         style={{
                           width: '44px',

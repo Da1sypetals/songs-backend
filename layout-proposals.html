@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daisy的歌单 — 布局方案对比</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6edf1;
+      color: #333;
+    }
+
+    /* 顶部方案切换条 */
+    .switcher-bar {
+      background: #ffffff;
+      border-bottom: 2px solid #ffd6e7;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(255, 107, 157, 0.08);
+    }
+    .switcher-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .switcher-divider {
+      width: 1px;
+      height: 26px;
+      background: #ffd6e7;
+      margin: 0 4px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 2px solid #ffd6e7;
+      background: #fff8fb;
+      color: #ff6b9d;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: #ff6b9d;
+      border-color: #ff6b9d;
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(255, 107, 157, 0.3);
+    }
+    .device-btn {
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 2px solid #ddd6fe;
+      background: #f5f3ff;
+      color: #7c6bf0;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .device-btn.active {
+      background: #7c6bf0;
+      border-color: #7c6bf0;
+      color: #ffffff;
+    }
+    .scheme-desc {
+      margin-left: auto;
+      font-size: 13px;
+      color: #9e6b7f;
+      font-weight: 500;
+    }
+
+    /* 预览舞台 */
+    .stage {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .viewport-frame {
+      background: #fff5f8;
+      border: 2px solid #ffd6e7;
+      border-radius: 20px;
+      box-shadow: 0 10px 32px rgba(255, 107, 157, 0.14);
+      overflow: hidden;
+      transition: width 0.25s ease;
+    }
+    .viewport-frame.desktop {
+      width: 1280px;
+      max-width: 100%;
+    }
+    .viewport-frame.mobile {
+      width: 390px;
+      border-radius: 30px;
+      border: 6px solid #3a2d34;
+    }
+
+    /* 歌单页面通用样式 */
+    .app-main {
+      padding: 16px;
+      min-height: 760px;
+      background: #fff5f8;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 14px 20px;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 2px solid #ffd6e7;
+      box-shadow: 0 2px 12px rgba(255, 107, 157, 0.08);
+      gap: 10px;
+    }
+    .header-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #ff6b9d;
+      margin: 0;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .badge-unlocked {
+      color: #ff6b9d;
+      font-size: 13px;
+      background: #ffe8f0;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .btn-logout {
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 2px solid #ffd6e7;
+      background: #fff5f8;
+      color: #ff6b9d;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* 卡片与通用控件 */
+    .panel-card {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 16px;
+      border: 2px solid #ffd6e7;
+      box-shadow: 0 2px 12px rgba(255, 107, 157, 0.08);
+    }
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      padding: 11px 14px;
+      border-radius: 20px;
+      border: 2px solid #ffd6e7;
+      font-size: 13px;
+      background: #fff8fb;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #ff6b9d;
+      box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.14);
+    }
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .btn-featured {
+      background: #ffe4e1;
+      color: #8b0000;
+      border: 2px solid #ffc0cb;
+    }
+    .btn-featured.active {
+      background: #8b0000;
+      color: #ffffff;
+      border-color: #8b0000;
+    }
+    .btn-pinned {
+      background: #fff3ed;
+      color: #d95d39;
+      border: 2px solid #ffd0be;
+    }
+    .btn-pinned.active {
+      background: #d95d39;
+      color: #ffffff;
+      border-color: #d95d39;
+    }
+    .ensemble-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff5f8;
+      border: 2px solid #ffd6e7;
+      border-radius: 16px;
+      padding: 4px 6px;
+    }
+    .ensemble-item {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 10px;
+      border: 2px solid #ffd6e7;
+      background: #ffffff;
+      color: #ff8fab;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    .ensemble-item.active {
+      background: #ff6b9d;
+      border-color: #ff6b9d;
+      color: #ffffff;
+      opacity: 1;
+    }
+    .btn-audio {
+      background: #fff5f8;
+      color: #ff6b9d;
+      border: 2px solid #ffd6e7;
+      padding: 9px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-audio.active {
+      background: #ff6b9d;
+      border-color: #ff6b9d;
+      color: #ffffff;
+    }
+    .count-pill {
+      color: #ff8fab;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 12px;
+      background: #fff5f8;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .count-pill strong { color: #ff6b9d; }
+
+    .btn-add {
+      background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 22px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255, 107, 157, 0.32);
+      white-space: nowrap;
+    }
+    .btn-random {
+      background: linear-gradient(135deg, rgb(239, 202, 80) 0%, rgb(249, 153, 105) 100%);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 22px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(246, 211, 101, 0.4);
+      white-space: nowrap;
+    }
+
+    /* 行布局 */
+    .inputs-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .filters-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+    .action-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin: 14px 0 18px;
+    }
+
+    /* 主两栏 */
+    .split-layout {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .col-left {
+      width: calc((100% - 16px) * 0.64);
+      flex: none;
+      min-width: 0;
+    }
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 歌曲三列卡片 */
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+    .song-card {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #ffe8f0;
+      box-shadow: 0 1px 4px rgba(255, 107, 157, 0.06);
+      position: relative;
+      cursor: pointer;
+    }
+    .song-card.selected {
+      background: #fff5f8;
+      border-color: #ff6b9d;
+      box-shadow: 0 2px 10px rgba(255, 107, 157, 0.18);
+    }
+    .song-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 6px;
+      padding-right: 32px;
+    }
+    .chip-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
+    }
+    .chip-singer {
+      background: #f5f3ff;
+      color: #8b7bf7;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid #ddd6fe;
+    }
+    .chip-key {
+      background: #f0f9ff;
+      color: #6bb3c7;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid #6bb3c7;
+    }
+    .chip-tag {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .corner-pin {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      color: #d95d39;
+      filter: drop-shadow(0 2px 3px rgba(217, 93, 57, 0.35));
+      pointer-events: none;
+    }
+    .corner-star {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #8b0000;
+      color: #fff;
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 10px;
+    }
+    .corner-audio {
+      position: absolute;
+      top: 8px;
+      right: 34px;
+      background: #fce4ec;
+      color: #ff6b9d;
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 10px;
+    }
+    .corner-ensemble {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      background: #ffd7a8;
+      border-radius: 8px;
+      padding: 2px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* 右侧详情展示卡 */
+    .detail-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 20px;
+      border: 2px solid #ffd6e7;
+      box-shadow: 0 2px 16px rgba(255, 107, 157, 0.12);
+      position: relative;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .detail-title {
+      flex: 1;
+      margin: 0;
+      font-size: 20px;
+      color: #ff6b9d;
+      font-weight: 700;
+    }
+    .detail-star {
+      background: #8b0000;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .detail-lyrics {
+      border: 2px solid #ff6b9d;
+      background: #fff0f5;
+      color: #ff6b9d;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .detail-section {
+      margin-bottom: 14px;
+    }
+    .detail-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ff8fab;
+      margin-bottom: 6px;
+    }
+    .detail-notes {
+      padding: 10px 14px;
+      background: #fff5f8;
+      border-radius: 12px;
+      border: 2px solid #ffd6e7;
+      font-size: 13px;
+      color: #ff6b9d;
+    }
+    .detail-time {
+      color: #ff8fab;
+      font-size: 12px;
+      padding: 8px 12px;
+      background: #fff0f5;
+      border-radius: 10px;
+      border: 1px dashed #ffd6e7;
+      margin-bottom: 14px;
+    }
+    .detail-bottom-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-pin-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #d95d39;
+      border: 2px solid #d95d39;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btn-edit {
+      flex: 1;
+      background: #2196F3;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-delete {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #f44336;
+      color: #ffffff;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* 方案二：右侧快捷操作与统计卡片 */
+    .top-grid-s2 {
+      display: flex;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+    .s2-side-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .stat-mini {
+      background: #fff5f8;
+      border: 1.5px solid #ffd6e7;
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ff6b9d;
+      line-height: 1.2;
+    }
+    .stat-num.pin { color: #d95d39; }
+    .stat-num.feat { color: #8b0000; }
+    .stat-text {
+      font-size: 11px;
+      color: #b07a8e;
+      margin-top: 2px;
+    }
+    .s2-btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .s2-btn-row button {
+      flex: 1;
+      padding: 11px 12px;
+      font-size: 14px;
+      border-radius: 16px;
+    }
+
+    /* 方案三：全宽一体化顶部栏 */
+    .s3-row1 {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .s3-row1-left {
+      width: calc((100% - 16px) * 0.64);
+      flex: none;
+      display: flex;
+      gap: 8px;
+    }
+    .s3-row1-right {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      min-width: 0;
+    }
+    .s3-row1-right button {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 14px;
+      border-radius: 16px;
+    }
+    .s3-row2 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .s3-count-right {
+      margin-left: auto;
+    }
+
+    /* 手机端规则（通过 .viewport-frame.mobile 模拟 max-width: 768px） */
+    .viewport-frame.mobile .header-title { font-size: 22px; }
+    .viewport-frame.mobile .header-bar { padding: 12px 14px; }
+    .viewport-frame.mobile .split-layout { gap: 10px; }
+    .viewport-frame.mobile .col-left { width: 50%; flex: 0 1 auto; }
+    .viewport-frame.mobile .col-right { width: 50%; flex: 0 1 auto; }
+    .viewport-frame.mobile .song-grid { grid-template-columns: 1fr; }
+    .viewport-frame.mobile .detail-card { padding: 12px; border-radius: 16px; }
+    .viewport-frame.mobile .detail-header { flex-wrap: wrap; }
+    .viewport-frame.mobile .detail-title { flex-basis: 100%; font-size: 16px; }
+    .viewport-frame.mobile .detail-bottom-actions {
+      gap: 6px;
+    }
+    .viewport-frame.mobile .btn-pin-toggle,
+    .viewport-frame.mobile .btn-delete {
+      width: 34px;
+      height: 36px;
+      border-radius: 10px;
+    }
+    .viewport-frame.mobile .btn-edit {
+      padding: 8px 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      border-radius: 10px;
+    }
+    .viewport-frame.mobile .stats-row {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .viewport-frame.mobile .stat-num { font-size: 15px; }
+    .viewport-frame.mobile .stat-text { font-size: 10px; }
+    .viewport-frame.mobile .btn-add,
+    .viewport-frame.mobile .btn-random {
+      padding: 10px 14px;
+      font-size: 13px;
+      border-radius: 16px;
+    }
+    /* 手机端搜索输入与筛选回退到全宽流式布局 */
+    .viewport-frame.mobile .mobile-flat-controls {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      align-items: center !important;
+    }
+    .viewport-frame.mobile .mobile-flat-controls > .inputs-row,
+    .viewport-frame.mobile .mobile-flat-controls > .filters-row {
+      display: contents !important;
+    }
+    .viewport-frame.mobile .search-input {
+      min-width: 140px;
+    }
+    /* 方案一手机端：搜索栏从左栏独立出来占满整行 */
+    .viewport-frame.mobile .s1-desktop-layout {
+      display: block;
+    }
+    .viewport-frame.mobile .s1-left-top {
+      width: 100%;
+    }
+    .viewport-frame.mobile .s1-mobile-split {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    /* 方案二手机端：上下堆叠 */
+    .viewport-frame.mobile .top-grid-s2 {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .viewport-frame.mobile .top-grid-s2 .col-left,
+    .viewport-frame.mobile .top-grid-s2 .col-right {
+      width: 100%;
+    }
+    /* 方案三手机端：第一行拆为流式换行 */
+    .viewport-frame.mobile .s3-row1 {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .viewport-frame.mobile .s3-row1-left {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .viewport-frame.mobile .s3-row1-right {
+      width: 100%;
+    }
+    .viewport-frame.mobile .s3-count-right {
+      margin-left: 0;
+    }
+
+    /* 方案一电脑端特殊网格：左侧搜索+操作+卡片 与 右侧通高详情卡 */
+    .s1-grid {
+      display: grid;
+      grid-template-columns: calc((100% - 16px) * 0.64) 1fr;
+      grid-template-rows: auto 1fr;
+      column-gap: 16px;
+      align-items: start;
+    }
+    .s1-top-left {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .s1-bottom-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .s1-right-full {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      position: sticky;
+      top: 16px;
+    }
+    .viewport-frame.mobile .s1-grid {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 10px;
+    }
+    .viewport-frame.mobile .s1-top-left {
+      grid-column: 1 / 3;
+      grid-row: 1;
+    }
+    .viewport-frame.mobile .s1-bottom-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .viewport-frame.mobile .s1-right-full {
+      grid-column: 2;
+      grid-row: 2;
+      position: static;
+    }
+
+    .scheme-section { display: none; }
+    .scheme-section.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="switcher-bar">
+    <div class="switcher-group">
+      <button class="tab-btn active" data-scheme="s1">方案一：右侧详情卡上提直通</button>
+      <button class="tab-btn" data-scheme="s2">方案二：顶部 64/36 并排操作统计卡</button>
+      <button class="tab-btn" data-scheme="s3">方案三：全宽一体化搜索工具栏</button>
+    </div>
+    <div class="switcher-divider"></div>
+    <div class="switcher-group">
+      <button class="device-btn active" data-device="desktop">电脑端 (1280px)</button>
+      <button class="device-btn" data-device="mobile">手机端 (390px)</button>
+    </div>
+    <div class="scheme-desc" id="scheme-desc">
+      电脑端右侧详情卡直接对齐搜索栏顶部，左侧搜索栏、操作按钮与三列卡片同宽对齐；手机端搜索区自动占满整行。
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="viewport-frame desktop" id="viewport-frame">
+      <div class="app-main">
+        <!-- 公共标题栏 -->
+        <div class="header-bar">
+          <h1 class="header-title">🎵 Daisy的歌单</h1>
+          <div class="header-actions">
+            <span class="badge-unlocked">✨ 已解锁</span>
+            <button class="btn-logout">退出</button>
+          </div>
+        </div>
+
+        <!-- 方案一：CSS Grid 实现电脑端右侧详情卡上提直通，手机端自动恢复顶部满宽搜索栏 -->
+        <section class="scheme-section active" id="scheme-s1">
+          <div class="s1-grid">
+            <div class="s1-top-left">
+              <div class="panel-card">
+                <div class="mobile-flat-controls" style="display:flex;flex-direction:column;gap:10px;">
+                  <div class="inputs-row">
+                    <input class="search-input" placeholder="🔍 搜索歌名（支持拼音）..." />
+                    <input class="search-input" placeholder="🎤 搜索歌手（支持拼音）..." />
+                    <input class="search-input" placeholder="🏷️ 搜索标签（支持拼音）..." />
+                  </div>
+                  <div class="filters-row">
+                    <button class="filter-btn btn-featured" data-toggle>☆ featured</button>
+                    <button class="filter-btn btn-pinned" data-toggle><span class="js-pin-icon"></span><span>pinned</span></button>
+                    <div class="ensemble-group">
+                      <button class="ensemble-item" data-toggle>none</button>
+                      <button class="ensemble-item" data-toggle>对唱</button>
+                      <button class="ensemble-item" data-toggle>合唱</button>
+                    </div>
+                    <button class="btn-audio" data-toggle title="只显示带音频的歌曲">🎧</button>
+                    <span class="count-pill" style="margin-left:auto;">🎵 共 <strong>128</strong> 首 / 展示 <strong>6</strong> 首</span>
+                  </div>
+                </div>
+              </div>
+              <div class="action-row">
+                <button class="btn-add">添加歌曲</button>
+                <button class="btn-random">🎲 随机一首</button>
+              </div>
+            </div>
+
+            <div class="s1-bottom-left">
+              <div class="song-grid js-song-grid"></div>
+            </div>
+
+            <div class="s1-right-full js-detail-slot"></div>
+          </div>
+        </section>
+
+        <!-- 方案二：顶部 64% 搜索栏 + 36% 快捷操作与统计卡片，上下 2x2 严丝合缝对齐 -->
+        <section class="scheme-section" id="scheme-s2">
+          <div class="top-grid-s2">
+            <div class="col-left panel-card">
+              <div class="mobile-flat-controls" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="inputs-row">
+                  <input class="search-input" placeholder="🔍 搜索歌名（支持拼音）..." />
+                  <input class="search-input" placeholder="🎤 搜索歌手（支持拼音）..." />
+                  <input class="search-input" placeholder="🏷️ 搜索标签（支持拼音）..." />
+                </div>
+                <div class="filters-row">
+                  <button class="filter-btn btn-featured" data-toggle>☆ featured</button>
+                  <button class="filter-btn btn-pinned" data-toggle><span class="js-pin-icon"></span><span>pinned</span></button>
+                  <div class="ensemble-group">
+                    <button class="ensemble-item" data-toggle>none</button>
+                    <button class="ensemble-item" data-toggle>对唱</button>
+                    <button class="ensemble-item" data-toggle>合唱</button>
+                  </div>
+                  <button class="btn-audio" data-toggle title="只显示带音频的歌曲">🎧</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-right panel-card s2-side-card">
+              <div class="stats-row">
+                <div class="stat-mini">
+                  <div class="stat-num">128</div>
+                  <div class="stat-text">全部歌曲</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="stat-num">6</div>
+                  <div class="stat-text">当前展示</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="stat-num pin">2</div>
+                  <div class="stat-text">pinned</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="stat-num feat">18</div>
+                  <div class="stat-text">featured</div>
+                </div>
+              </div>
+              <div class="s2-btn-row">
+                <button class="btn-add">添加歌曲</button>
+                <button class="btn-random">🎲 随机一首</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="split-layout">
+            <div class="col-left">
+              <div class="song-grid js-song-grid"></div>
+            </div>
+            <div class="col-right js-detail-slot"></div>
+          </div>
+        </section>
+
+        <!-- 方案三：全宽一体化顶部工具栏（上行左 64% 三个输入框 + 右 36% 操作按钮；下行左对齐筛选 + 右侧计数） -->
+        <section class="scheme-section" id="scheme-s3">
+          <div class="panel-card" style="margin-bottom: 16px;">
+            <div class="s3-row1">
+              <div class="s3-row1-left">
+                <input class="search-input" placeholder="🔍 搜索歌名（支持拼音）..." />
+                <input class="search-input" placeholder="🎤 搜索歌手（支持拼音）..." />
+                <input class="search-input" placeholder="🏷️ 搜索标签（支持拼音）..." />
+              </div>
+              <div class="s3-row1-right">
+                <button class="btn-add">添加歌曲</button>
+                <button class="btn-random">🎲 随机一首</button>
+              </div>
+            </div>
+            <div class="s3-row2">
+              <button class="filter-btn btn-featured" data-toggle>☆ featured</button>
+              <button class="filter-btn btn-pinned" data-toggle><span class="js-pin-icon"></span><span>pinned</span></button>
+              <div class="ensemble-group">
+                <button class="ensemble-item" data-toggle>none</button>
+                <button class="ensemble-item" data-toggle>对唱</button>
+                <button class="ensemble-item" data-toggle>合唱</button>
+              </div>
+              <button class="btn-audio" data-toggle title="只显示带音频的歌曲">🎧</button>
+              <span class="count-pill s3-count-right">🎵 共 <strong>128</strong> 首歌 / 展示 <strong>6</strong> 首歌</span>
+            </div>
+          </div>
+
+          <div class="split-layout">
+            <div class="col-left">
+              <div class="song-grid js-song-grid"></div>
+            </div>
+            <div class="col-right js-detail-slot"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" style="display:block;flex-shrink:0"><g fill="none"><path fill="currentColor" d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7z" opacity=".2"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7zM1.8 22.2l5.97-5.96"/></g></svg>`;
+    const PIN_CORNER_SVG = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" style="display:block;transform:scaleX(-1)"><g fill="none"><path fill="currentColor" d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7z" opacity=".2"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7zM1.8 22.2l5.97-5.96"/></g></svg>`;
+    const PIN_OFF_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" style="display:block"><g fill="none"><path fill="currentColor" d="M5.9 14.38c-2-2-3-3.01-2.76-4.09c.24-1.07 1.57-1.55 4.25-2.5l5.34-1.91l.22-.08a2 2 0 0 0 1.23-1.82q.03-.49.06-.62a2 2 0 0 1 3.22-1.2l.45.44l3.42 3.43c.33.33.5.5.6.62a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.37l-2.13 5.37c-1.01 2.56-1.52 3.84-2.58 4.05c-1.05.22-2.02-.75-3.97-2.7z" opacity=".2"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m2.7 2.7l18.6 18.6M7.62 7.74l-.18.07c-2.7.94-4.04 1.42-4.29 2.5c-.24 1.07.76 2.08 2.78 4.1l3.64 3.64c1.94 1.94 2.91 2.9 3.97 2.69c1.05-.22 1.56-1.49 2.58-4.03l.16-.4M1.8 22.2l5.97-5.96m2.8-9.6l2.16-.77l.21-.08a2 2 0 0 0 1.22-1.58l.02-.23c.02-.34.04-.51.06-.62a2 2 0 0 1 3.22-1.2l.44.44l3.43 3.42c.33.34.5.5.6.63a2 2 0 0 1-1.04 3.1c-.15.04-.38.08-.85.14l-.3.05a2 2 0 0 0-1.5 1.36l-.9 2.25"/></g></svg>`;
+
+    const SAMPLE_SONGS = [
+      { name: "晴天", singers: ["周杰伦"], key: "原调", tags: ["流行", "怀旧"], pinned: true, featured: true, audio: true, ensemble: "", selected: true },
+      { name: "富士山下", singers: ["陈奕迅"], key: "-1", tags: ["粤语", "抒情"], pinned: true, featured: false, audio: false, ensemble: "" },
+      { name: "告白气球", singers: ["周杰伦"], key: "未定调", tags: ["甜歌"], pinned: false, featured: true, audio: false, ensemble: "👥" },
+      { name: "七里香", singers: ["周杰伦"], key: "+2", tags: ["流行", "清新"], pinned: false, featured: false, audio: true, ensemble: "👫" },
+      { name: "红豆", singers: ["王菲"], key: "原调", tags: ["抒情", "经典"], pinned: false, featured: true, audio: false, ensemble: "" },
+      { name: "青花瓷", singers: ["周杰伦"], key: "-2", tags: ["古风", "中国风"], pinned: false, featured: false, audio: false, ensemble: "" },
+    ];
+
+    const DESCRIPTIONS = {
+      s1: "电脑端右侧详情卡直接对齐搜索栏顶部，左侧搜索栏、操作按钮与三列卡片同宽对齐；手机端搜索区自动占满整行。",
+      s2: "电脑端顶部采用 64% 搜索栏与 36% 统计操作卡并排，与下方两栏组成 2×2 网格；手机端上下紧凑堆叠。",
+      s3: "电脑端全宽工具栏将三个输入框对齐下方三列卡片（64%），右侧 36% 放置添加与随机按钮，第二行筛选按钮左对齐；手机端流式换行。"
+    };
+
+    document.querySelectorAll(".js-pin-icon").forEach(el => { el.innerHTML = PIN_SVG; });
+
+    function renderCards() {
+      const html = SAMPLE_SONGS.map((s) => `
+        <div class="song-card ${s.selected ? 'selected' : ''}">
+          ${s.pinned ? `<div class="corner-pin">${PIN_CORNER_SVG(22)}</div>` : ''}
+          ${s.audio ? `<div class="corner-audio" style="right:${s.featured ? '34px' : '8px'}">🎧</div>` : ''}
+          ${s.featured ? `<div class="corner-star">⭐</div>` : ''}
+          ${s.ensemble ? `<div class="corner-ensemble">${s.ensemble}</div>` : ''}
+          <div class="song-name">${s.name}</div>
+          <div class="chip-row">${s.singers.map(x => `<span class="chip-singer">${x}</span>`).join('')}</div>
+          <div class="chip-row">
+            <span class="chip-key">${s.key}</span>
+            ${s.tags.map(t => `<span class="chip-tag">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join("");
+      document.querySelectorAll(".js-song-grid").forEach(el => { el.innerHTML = html; });
+    }
+
+    function renderDetail() {
+      const html = `
+        <div class="detail-card">
+          <div class="corner-pin" style="top:-12px;left:-12px;">${PIN_CORNER_SVG(26)}</div>
+          <div class="detail-header">
+            <h2 class="detail-title">晴天</h2>
+            <span class="detail-star">⭐ featured</span>
+            <span class="detail-lyrics">🎶 歌词</span>
+          </div>
+          <div class="detail-section">
+            <span class="detail-label">🎤 参考歌手</span>
+            <div class="chip-row"><span class="chip-singer">周杰伦</span></div>
+          </div>
+          <div class="detail-section">
+            <span class="detail-label">🎹 升降调</span>
+            <span class="chip-key" style="font-size:14px;padding:6px 12px;display:inline-block;">原调</span>
+          </div>
+          <div class="detail-section">
+            <span class="detail-label">🏷️ 标签</span>
+            <div class="chip-row"><span class="chip-tag">流行</span><span class="chip-tag">怀旧</span></div>
+          </div>
+          <div class="detail-section">
+            <span class="detail-label">📝 备注</span>
+            <div class="detail-notes">经典前奏，副歌最后一遍稍微抬高情绪。</div>
+          </div>
+          <div class="detail-time">🕐 添加时间: 2026/1/1 08:00:00</div>
+          <div class="detail-bottom-actions">
+            <button class="btn-pin-toggle" title="Unpin">${PIN_OFF_SVG}</button>
+            <button class="btn-edit">编辑 ✏️</button>
+            <button class="btn-delete">🗑️</button>
+          </div>
+        </div>
+      `;
+      document.querySelectorAll(".js-detail-slot").forEach(el => { el.innerHTML = html; });
+    }
+
+    renderCards();
+    renderDetail();
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const scheme = btn.dataset.scheme;
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+        document.querySelectorAll(".scheme-section").forEach(s => s.classList.toggle("active", s.id === `scheme-${scheme}`));
+        document.getElementById("scheme-desc").textContent = DESCRIPTIONS[scheme];
+      });
+    });
+
+    document.querySelectorAll(".device-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const device = btn.dataset.device;
+        document.querySelectorAll(".device-btn").forEach(b => b.classList.toggle("active", b === btn));
+        const frame = document.getElementById("viewport-frame");
+        frame.classList.remove("desktop", "mobile");
+        frame.classList.add(device);
+      });
+    });
+
+    document.querySelectorAll("[data-toggle]").forEach(btn => {
+      btn.addEventListener("click", () => btn.classList.toggle("active"));
+    });
+  </script>
+</body>
+</html>

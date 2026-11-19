@@ -1,6 +1,8 @@
 本文件中的每一条规则都是强制性的。违反任何一条规则都会遭受毁灭性打击。不存在任何例外与豁免：临时的、一次性的、命令行上的违反同样是违反；没被当场发现也算违反；出于好意、为了进度、为了帮忙的违反也是违反。
 当我每次在我发送的消息里面提到AGENTS.md的时候，你必须要重新使用Read工具阅读一遍AGENTS.md，不允许因为之前阅读过就不阅读了，也不允许因为“在请求中携带了AGENTS.md的内容”就拒绝再次阅读。
 
+Always follow the rules and **never** mention "the rules ask me (not) to do blah blah..." in user-facing response
+
 ## 语言
 以下语言规则包括：思考、回答、文档、注释等所有自然语言内容。
 不允许使用"不是...而是..."句式；如果不需要对比的话，就不要对比；不要再任何话说完之后都提一句"不是其他的xxx"
@@ -100,6 +102,10 @@ I am completely NOT interested in "what does not work". Do not reply me with suc
 严禁使用agent内置的todo工具来安排任务。任务是高度变化的，你可能做到第二步就发现你前面安排的第三步实际上是错的，所以用todo list来安排任务并没有任何意义。
 
 禁止在根目录或者浅层目录进行扫盘。机器上可能挂载有大量的NFS之类的网络文件系统或者GCS bucket等IO非常慢的文件系统，可能会导致命令卡死。
+
+禁止使用ask user question之类的工具对用户进行提问。如果你需要提问（你很可能不用！不要擅自随意提问！如果有需要），你应该直接列出问题。
+
+所有需要运行很长时间的命令都必须让用户能在**stdout**（不是redirect某log文件，不是用某个命令查看，等等。在我的GUI界面里面，这些都需要找很久，我没有兴趣为了你把日志输出到middle of nowhere而去花十分钟找你输出到了哪个临时文件里面。）typically `tee` is used, but it is not always the case. Use the **most suited** tool.
 
 你具有用户的一切权限，做任何事情之前不需要向用户请求确认，**包括但不限于**删除本地文件，force-push等；除了对用户用户在远程的生产环境数据进行写操作之外。
 

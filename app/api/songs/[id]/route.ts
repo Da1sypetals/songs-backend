@@ -52,11 +52,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = await Promise.resolve(params);
     const body = await request.json();
     const { name, singers, tags, key, notes } = body;
 
     const songMap = await getSongMap();
-    const existingSong = songMap[params.id];
+    const existingSong = songMap[id];
 
     if (!existingSong) {
       return NextResponse.json({
@@ -82,7 +83,7 @@ export async function PUT(
 
     // 更新歌曲（保留创建时间）
     const updatedSong: Song = {
-      id: params.id,
+      id,
       name: name.trim(),
       singers: singers.filter((s: string) => s.trim()).map((s: string) => s.trim()),
       tags: tags ? tags.filter((t: string) => t.trim()).map((t: string) => t.trim()) : [],
@@ -90,13 +91,14 @@ export async function PUT(
       notes: notes?.trim() || undefined,
       lyrics: existingSong.lyrics,
       featured: body.featured === true,
+      pinned: typeof body.pinned === 'boolean' ? body.pinned : existingSong.pinned === true,
       ensembleType: normalizeEnsembleType(body.ensembleType),
       hasAudio: existingSong.hasAudio,
       audioMeta: existingSong.audioMeta,
       createdAt: existingSong.createdAt
     };
 
-    songMap[params.id] = updatedSong;
+    songMap[id] = updatedSong;
     await setSongMap(songMap);
 
     return NextResponse.json({

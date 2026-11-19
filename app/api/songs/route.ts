@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       key: key === null ? null : (typeof key === 'number' ? key : 0),
       notes: notes?.trim() || undefined,
       featured: body.featured === true,
+      pinned: body.pinned === true,
       ensembleType: normalizeEnsembleType(body.ensembleType),
       createdAt: new Date().toISOString()
     };

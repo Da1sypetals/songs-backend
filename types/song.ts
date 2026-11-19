@@ -22,6 +22,7 @@ export interface Song {
   notes?: string;
   lyrics?: string;
   featured?: boolean;
+  pinned?: boolean;
   ensembleType?: EnsembleType;
   hasAudio?: boolean;
   audioMeta?: SongAudioMeta;
@@ -35,6 +36,7 @@ export interface CreateSongRequest {
   key: number | null;  // null = 未定调, 0 = 原调, >0 = 升调, <0 = 降调
   notes?: string;
   featured?: boolean;
+  pinned?: boolean;
   ensembleType: EnsembleType;
 }
 
